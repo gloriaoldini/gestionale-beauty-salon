@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dashboard</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh">
+<dc-import name="Header" active="pannello" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Dashboard</h1>
+<p class="t-muted">The salon’s takings · {{periodSub}}</p>
+</div>
+<div class="pills" role="group" aria-label="Period">
+<sc-for list="{{periods}}" as="p" hint-placeholder-count="2"><button type="button" class="pill" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+</div>
+
+<sc-if value="{{noData}}" hint-placeholder-val="{{ false }}">
+<div class="card first-note" role="status"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"></path></svg></span><span><b>This is where you’ll see the salon’s takings</b><small>The numbers fill in by themselves when you mark appointments as paid, record a cream sale or create a gift voucher.</small></span><a class="btn btn-secondary btn-sm" href="Home.html">Open the calendar</a></div>
+</sc-if>
+<div class="dash-grid">
+
+<section class="card kpi span-4" aria-labelledby="k1">
+<h2 id="k1" class="t-over">Taken today</h2>
+<p class="num">{{inToday}}</p>
+<p class="sub">{{inTodaySub}}</p>
+</section>
+<section class="card kpi span-4" aria-labelledby="k2">
+<h2 id="k2" class="t-over">Taken {{inLbl}}</h2>
+<p class="num">{{inWeek}}</p>
+<p class="sub">{{inSub}}</p>
+</section>
+<section class="card kpi span-4" aria-labelledby="k3">
+<h2 id="k3" class="t-over">Expected {{untilLbl}}</h2>
+<p class="num">{{forecast}}</p>
+<p class="sub">{{forecastSub}}</p>
+</section>
+
+<section class="card span-7" aria-labelledby="wk-t">
+<div class="card-hd"><h2 id="wk-t" class="t-h3">{{chartTitle}}</h2><span class="t-small t-muted">in €</span></div>
+<div class="{{wkCls}}" role="list">
+<sc-for list="{{week}}" as="w" hint-placeholder-count="6">
+<div class="{{w.cls}}" role="listitem" aria-label="{{w.aria}}">
+<span class="wk-n" aria-hidden="true">{{w.lbl}}</span>
+<span class="wk-bar" style="height: {{w.h}}px" aria-hidden="true"></span>
+<span class="wk-d" aria-hidden="true">{{w.dn}} {{w.d}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="card span-5" aria-labelledby="src-t">
+<div class="card-hd"><h2 id="src-t" class="t-h3">Where it comes from</h2><span class="t-small t-muted">{{inLbl}}</span></div>
+<div class="load">
+<sc-for list="{{sources}}" as="l" hint-placeholder-count="3">
+<div class="load-row">
+<span class="who">{{l.name}}</span>
+<span class="bar" role="img" aria-label="{{l.aria}}"><i style="width: {{l.pct}}%; background: {{l.color}}"></i></span>
+<span class="t-small" style="text-align: right; font-weight: 600">{{l.tot}}</span>
+</div>
+</sc-for>
+</div>
+<p class="t-small t-muted" style="margin-top: 16px">Treatments paid with a voucher aren’t counted twice: the voucher is already taken when it’s sold.</p>
+</section>
+
+<section class="card span-6" aria-labelledby="op-t">
+<div class="card-hd"><h2 id="op-t" class="t-h3">Treatments by staff member</h2><span class="t-small t-muted">{{inLbl}}</span></div>
+<div class="load">
+<sc-for list="{{byOp}}" as="l" hint-placeholder-count="4">
+<div class="load-row">
+<span class="who"><span class="{{l.avCls}}" aria-hidden="true">{{l.ini}}</span>{{l.short}}</span>
+<span class="bar" role="img" aria-label="{{l.aria}}"><i style="width: {{l.pct}}%; background: {{l.color}}"></i></span>
+<span class="t-small" style="text-align: right; font-weight: 600">{{l.tot}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="card span-6" aria-labelledby="due-t">
+<div class="card-hd"><h2 id="due-t" class="t-h3">To collect</h2><a class="link" href="Home.html">Open the calendar</a></div>
+<p class="t-small t-muted" style="margin-bottom: 8px">Appointments already done but not yet marked as paid.</p>
+<sc-if value="{{noDue}}" hint-placeholder-val="{{ false }}"><p class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>All collected</p></sc-if>
+<ul class="up-list">
+<sc-for list="{{due}}" as="a" hint-placeholder-count="2">
+<li class="up-item"><span class="up-time">{{a.from}}<small>{{a.dayLbl}}</small></span><span class="up-main"><b>{{a.client}}</b><span class="t-small" style="color: #4F4446">{{a.tr}} · {{a.staffName}}</span></span><span class="amt">{{a.priceLbl}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+<section class="card span-6" aria-labelledby="pr-t">
+<div class="card-hd"><h2 id="pr-t" class="t-h3">Product sales</h2><a class="link" href="Prodotti.html">Go to Products</a></div>
+<div class="mini-kpis">
+<div><span class="t-over">Today</span><p class="num-md">{{prToday}}</p><span class="t-small t-muted">{{prTodayN}}</span></div>
+<div><span class="t-over">{{periodLbl}}</span><p class="num-md">{{prWeek}}</p><span class="t-small t-muted">{{prWeekN}}</span></div>
+</div>
+<ul class="up-list" aria-label="This week’s sales by product">
+<sc-for list="{{byProd}}" as="b" hint-placeholder-count="3">
+<li class="up-item"><span class="up-main"><b>{{b.name}}</b><span class="t-small" style="color: #4F4446">{{b.nLbl}} · {{b.left}}</span></span>
+<sc-if value="{{b.low}}" hint-placeholder-val="{{ false }}"><span class="{{b.tagCls}}">{{b.tag}}</span></sc-if>
+<span class="amt">{{b.tot}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+<section class="card span-6" aria-labelledby="gv-t">
+<div class="card-hd"><h2 id="gv-t" class="t-h3">Gift vouchers</h2><a class="link" href="Buoni.html">Go to Gift vouchers</a></div>
+<div class="mini-kpis">
+<div><span class="t-over">Sold {{inLbl}}</span><p class="num-md">{{vSoldVal}}</p><span class="t-small t-muted">{{vSoldN}}</span></div>
+<div><span class="t-over">Valid, still to use</span><p class="num-md">{{vValue}}</p><span class="t-small t-muted">{{vValidN}}</span></div>
+</div>
+<h3 class="t-label" style="margin: 4px 0">Expiring in the next 30 days</h3>
+<sc-if value="{{noExp}}" hint-placeholder-val="{{ false }}"><p class="t-muted t-small">No vouchers expiring.</p></sc-if>
+<ul class="up-list">
+<sc-for list="{{expSoon}}" as="v" hint-placeholder-count="1">
+<li class="up-item"><span class="code">{{v.code}}</span><span class="up-main"><b>{{v.to}}</b><span class="t-small" style="color: #4F4446">{{v.svc}} · € {{v.amount}}</span></span><span class="tag tag-warn">Expires on {{v.expLbl}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"period":{"editor":"enum","options":["settimana","mese"],"default":"settimana"},"$preview":{"width":1440,"height":1600}}'>
+const STAFF = [
+  { id: 'b', name: 'Bianca Neri', short: 'Bianca', ini: 'B', c: 'c1', color: '#5B3FA0' },
+  { id: 'c', name: 'Chiara Ferri', short: 'Chiara', ini: 'C', c: 'c2', color: '#2F7A6B' },
+  { id: 'm', name: 'Martina Sole', short: 'Martina', ini: 'M', c: 'c3', color: '#9A5208' },
+  { id: 'n', name: 'Noemi Riva', short: 'Noemi', ini: 'N', c: 'c4', color: '#2A5F95' }
+];
+const DAYS = [
+  { dn: 'Mon', d: 9 }, { dn: 'Tue', d: 10 }, { dn: 'Wed', d: 11 }, { dn: 'Thu', d: 12 }, { dn: 'Fri', d: 13 }, { dn: 'Sat', d: 14 }
+];
+const TODAY = 3;
+const NOW = 10 * 60 + 10;
+// Stessi prezzi della pagina Trattamenti
+const PRICES0 = { 'Deep cleansing facial': 60, 'Anti-ageing facial': 75, 'Skin consultation': 20, 'Relaxing massage': 55, 'Lymphatic drainage': 60, 'Body treatment': 80, 'Body scrub': 40 };
+// Stessi dati del Calendario: [giorno, inizio, fine, cliente, trattamento, operatrice]
+const APPTS = [
+  [0, '09:00', '10:00', 'Anna Galli', 'Deep cleansing facial', 'b'], [0, '09:00', '10:00', 'Sara Bassi', 'Relaxing massage', 'c'], [0, '09:30', '10:30', 'Elisa Monti', 'Deep cleansing facial', 'm'], [0, '10:00', '11:00', 'Laura Pini', 'Lymphatic drainage', 'n'], [0, '11:00', '12:30', 'Marta Rossetti', 'Body treatment', 'b'], [0, '14:00', '15:00', 'Giada Fumi', 'Skin consultation', 'c'], [0, '15:00', '16:00', 'Paola Riccio', 'Relaxing massage', 'm'], [0, '16:00', '17:00', 'Irma Basile', 'Lymphatic drainage', 'n'],
+  [1, '09:00', '10:00', 'Silvia Moro', 'Relaxing massage', 'c'], [1, '09:00', '10:00', 'Clara Doni', 'Lymphatic drainage', 'm'], [1, '10:30', '11:30', 'Vera Longhi', 'Deep cleansing facial', 'b'], [1, '11:00', '12:00', 'Rita Sala', 'Deep cleansing facial', 'n'], [1, '14:00', '15:00', 'Ada Pozzi', 'Body treatment', 'm'], [1, '16:00', '17:30', 'Nora Ghidi', 'Relaxing massage', 'c'],
+  [2, '09:00', '10:00', 'Alice Rota', 'Skin consultation', 'n'], [2, '09:30', '11:00', 'Bice Ferro', 'Lymphatic drainage', 'm'], [2, '10:30', '11:30', 'Elena Gori', 'Body treatment', 'b'], [2, '12:00', '13:00', 'Dora Vitali', 'Deep cleansing facial', 'm'], [2, '14:00', '15:00', 'Ines Carli', 'Relaxing massage', 'b'], [2, '15:00', '16:00', 'Lia Bruni', 'Relaxing massage', 'n'],
+  [3, '09:00', '10:00', 'Pia Marchi', 'Skin consultation', 'b'], [3, '11:00', '12:00', 'Olga Brera', 'Relaxing massage', 'c'], [3, '13:00', '14:00', 'Tea Ferrante', 'Deep cleansing facial', 'n'], [3, '14:00', '15:00', 'Gaia Orsi', 'Lymphatic drainage', 'c'], [3, '15:00', '16:00', 'Sofia Lodi', 'Lymphatic drainage', 'b'], [3, '17:00', '18:00', 'Rosa Bassani', 'Relaxing massage', 'n'],
+  [4, '09:00', '10:00', 'Carla Duse', 'Relaxing massage', 'c'], [4, '09:30', '10:30', 'Dafne Mori', 'Deep cleansing facial', 'n'], [4, '11:00', '12:00', 'Lisa Esposti', 'Body treatment', 'b'], [4, '12:00', '13:00', 'Ada Volpe', 'Skin consultation', 'm'], [4, '15:00', '16:00', 'Nadia Cerri', 'Relaxing massage', 'm'], [4, '16:00', '17:30', 'Livia Peri', 'Deep cleansing facial', 'c'], [4, '18:00', '19:00', 'Cora Landi', 'Deep cleansing facial', 'b'],
+  [5, '09:00', '10:00', 'Marta Zeni', 'Relaxing massage', 'b'], [5, '10:00', '11:00', 'Viola Arno', 'Relaxing massage', 'm'], [5, '10:00', '11:00', 'Arianna Pace', 'Skin consultation', 'n'], [5, '11:00', '12:00', 'Irene Vigo', 'Body treatment', 'c'], [5, '13:00', '14:00', 'Aurora Tosi', 'Lymphatic drainage', 'c'], [5, '15:00', '16:00', 'Bea Lanza', 'Lymphatic drainage', 'n']
+];
+const MESI3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const offOf = (y, m, d) => Math.round((Date.UTC(y, m, d) - Date.UTC(2026, 10, 9)) / 864e5);
+const dLbl = (off) => { const d = new Date(2026, 10, 9 + off); return d.getDate() + ' ' + MESI3[d.getMonth()]; };
+const eur = (n) => '€ ' + String(Math.round(n * 100) / 100).replace('.', ',');
+const PRODUCTS0 = [
+  { id: 'p1', name: 'Hydrating face cream', desc: 'For dry and sensitive skin, for daily use', size: '50 ml', price: 32, stock: 12 },
+  { id: 'p2', name: 'Nourishing body cream', desc: 'Rich texture, ideal after a scrub', size: '200 ml', price: 28, stock: 3 },
+  { id: 'p3', name: 'Repairing hand cream', desc: 'Absorbs quickly, not greasy', size: '75 ml', price: 14, stock: 20 }
+];
+// Vendite di esempio: [giorno, ora, id prodotto, cliente] · giorno 0 = lunedì 9 novembre 2026
+const SALES0 = [
+  [-44, '10:00', 'p1', 'Anna Galli'], [-39, '16:20', 'p3', 'Vera Longhi'], [-34, '11:45', 'p2', 'Clara Doni'],
+  [-7, '11:15', 'p2', 'Marta Rossetti'], [-6, '17:00', 'p1', 'Sara Bassi'], [-4, '10:40', 'p3', 'Silvia Moro'], [-3, '12:30', 'p1', 'Laura Pini'], [-2, '15:10', 'p2', 'Giada Fumi'],
+  [0, '10:20', 'p1', 'Anna Galli'], [0, '16:05', 'p3', 'Paola Riccio'], [1, '12:10', 'p2', 'Ada Pozzi'], [2, '09:50', 'p1', 'Alice Rota'], [2, '11:30', 'p3', 'Elena Gori'], [2, '15:40', 'p3', ''], [3, '09:45', 'p1', 'Pia Marchi']
+].map((x, i) => { const p = PRODUCTS0.find((q) => q.id === x[2]); return { id: 's' + (i + 1), day: x[0], time: x[1], pid: p.id, name: p.name, price: p.price, client: x[3] }; });
+// Stessi buoni della pagina Buoni regalo
+const VOUCHERS0 = [
+  { id: 'v1', code: 'GB-4821', svc: 'Anti-ageing facial', amount: 75, from: 'Anna Galli', to: 'Sara Bassi', created: offOf(2026, 9, 2), expires: offOf(2027, 3, 2), used: null },
+  { id: 'v2', code: 'GB-6142', svc: 'Deep cleansing facial', amount: 60, from: 'Paola Riccio', to: 'Tea Ferrante', created: offOf(2026, 10, 10), expires: offOf(2027, 4, 10), used: null },
+  { id: 'v3', code: 'GB-3307', svc: 'Relaxing massage', amount: 55, from: 'Marta Rossetti', to: 'Silvia Moro', created: offOf(2026, 8, 15), expires: offOf(2027, 2, 15), used: offOf(2026, 9, 20) },
+  { id: 'v4', code: 'GB-5590', svc: 'Body scrub', amount: 40, from: 'Vera Longhi', to: 'Lia Bruni', created: offOf(2026, 7, 10), expires: offOf(2026, 10, 10), used: null },
+  { id: 'v5', code: 'GB-7215', svc: 'Body treatment', amount: 80, from: 'Rosa Bassani', to: 'Gaia Orsi', created: offOf(2026, 9, 28), expires: null, used: null },
+  { id: 'v6', code: 'GB-2954', svc: 'Lymphatic drainage', amount: 60, from: 'Clara Doni', to: 'Nora Ghidi', created: offOf(2026, 5, 1), expires: offOf(2026, 11, 1), used: null }
+];
+const toMin = (s) => { const p = s.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+// Stessa agenda del Calendario: da sabato 1 agosto a giovedì 31 dicembre 2026 (esclusi i festivi)
+const CL_NAMES = ['Anna Galli', 'Sara Bassi', 'Elisa Monti', 'Laura Pini', 'Marta Rossetti', 'Giada Fumi', 'Paola Riccio', 'Irma Basile', 'Silvia Moro', 'Clara Doni', 'Vera Longhi', 'Rita Sala', 'Ada Pozzi', 'Nora Ghidi', 'Alice Rota', 'Bice Ferro', 'Elena Gori', 'Dora Vitali', 'Ines Carli', 'Lia Bruni', 'Pia Marchi', 'Olga Brera', 'Tea Ferrante', 'Gaia Orsi', 'Sofia Lodi', 'Rosa Bassani', 'Carla Duse', 'Dafne Mori', 'Lisa Esposti', 'Ada Volpe', 'Nadia Cerri', 'Livia Peri', 'Cora Landi', 'Marta Zeni', 'Viola Arno', 'Arianna Pace', 'Irene Vigo', 'Aurora Tosi', 'Bea Lanza'];
+const ALL = APPTS.map((a) => ({ day: a[0], s: toMin(a[1]), e: toMin(a[2]), client: a[3], tr: a[4], op: a[5] }));
+(() => {
+  const FIRST = offOf(2026, 7, 1), LAST = offOf(2026, 11, 31);
+  const HOLIDAYS = [offOf(2026, 7, 15), offOf(2026, 11, 8), offOf(2026, 11, 25), offOf(2026, 11, 26)];
+  for (let k = -15; k <= 7; k++) {
+    if (k === 0) continue;
+    APPTS.forEach((a, i) => {
+      const day = a[0] + 7 * k;
+      if (day < FIRST || day > LAST || HOLIDAYS.includes(day)) return;
+      if ((((i * 7 + k * 3) % 5) + 5) % 5 === 0) return;
+      const ci = (((CL_NAMES.indexOf(a[3]) + 5 * k) % 39) + 39) % 39;
+      ALL.push({ day, s: toMin(a[1]), e: toMin(a[2]), client: CL_NAMES[ci], tr: a[4], op: a[5] });
+    });
+  }
+})();
+// Periodi: settimana in corso e mese di novembre, divisi in settimane
+const PERIODS = {
+  settimana: { from: 0, to: 5, label: 'This week', sub: 'week 9 – 14 November', until: 'by Saturday', inLbl: 'this week' },
+  mese: { from: offOf(2026, 10, 1), to: offOf(2026, 10, 30), label: 'November', sub: 'November 2026', until: 'by the end of the month', inLbl: 'in November' }
+};
+const MONTH_WEEKS = [[-7, -2, '2–7'], [0, 5, '9–14'], [7, 12, '16–21'], [14, 19, '23–28'], [21, 21, '30']];
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient', 'products', 'vouchers', 'sales'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+const HEX = { c1: '#5B3FA0', c2: '#2F7A6B', c3: '#9A5208', c4: '#2A5F95', c5: '#3D6B2E', c6: 'var(--c6)' };
+const pad = (n) => (n < 10 ? '0' : '') + n;
+const fmt = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const pz = (n) => (n === 1 ? '1 item' : n + ' items');
+const vend = (n) => (n === 1 ? '1 item sold' : n + ' items sold');
+const sum = (l, f) => l.reduce((t, x) => t + (f ? f(x) : x.price), 0);
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) this.setState(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  renderVals() {
+    const ALLSTAFF = this.state.members
+      ? this.state.members.map((m) => ({ id: m.id, name: (m.nome + ' ' + (m.cognome || '')).trim(), short: m.nome, ini: (m.nome || '?').charAt(0).toUpperCase(), c: m.c, color: HEX[m.c] || '#4A5568', active: m.active !== false }))
+      : STAFF.map((s) => ({ ...s, active: true }));
+    const UNKNOWN = { id: '?', name: 'Removed staff member', short: '—', ini: '?', c: 'c6', color: '#4A5568' };
+    const prices = { ...PRICES0 };
+    (this.state.svcs || []).forEach((s) => { if (s.price !== undefined) prices[s.name] = Number(s.price) || 0; });
+    const pk = this.state.period || (this.props.period === 'mese' ? 'mese' : 'settimana');
+    const P = PERIODS[pk];
+    const inP = (d) => d >= P.from && d <= P.to;
+    // Appuntamenti del periodo con prezzo e stato del pagamento
+    const src = this.state.items
+      ? this.state.items.filter((a) => a.kind !== 'block' && inP(a.day)).map((a) => ({ day: a.day, s: a.s, e: a.e, client: a.client, tr: a.tr, op: a.op, paid: !!a.paid, voucher: a.voucher || null }))
+      : ALL.filter((a) => inP(a.day)).map((a) => ({ ...a, paid: a.day < TODAY || (a.day === TODAY && a.e <= NOW), voucher: null }));
+    const appts = src.map((a) => ({ ...a, price: prices[a.tr] || 0, staff: ALLSTAFF.find((s) => s.id === a.op) || UNKNOWN }));
+    const cash = appts.filter((a) => a.paid && !a.voucher);
+    const done = (a) => a.day < TODAY || (a.day === TODAY && a.e <= NOW);
+    const due = appts.filter((a) => done(a) && !a.paid).sort((a, b) => a.day - b.day || a.s - b.s);
+    const upcoming = appts.filter((a) => !done(a) && !a.paid);
+    // Prodotti
+    const products = this.state.products ?? PRODUCTS0;
+    const allSales = this.state.sales ?? SALES0;
+    const sales = allSales.filter((x) => inP(x.day));
+    // Buoni
+    const vouchers = this.state.vouchers ?? VOUCHERS0;
+    const isUsed = (v) => v.used !== null && v.used !== undefined;
+    const sold = vouchers.filter((v) => inP(v.created));
+    const valid = vouchers.filter((v) => !isUsed(v) && (v.expires === null || v.expires === undefined || v.expires >= TODAY));
+    const amt = (v) => v.amount || 0;
+    // Totali
+    const rangeTot = (f, t) => sum(cash.filter((a) => a.day >= f && a.day <= t)) + sum(sales.filter((x) => x.day >= f && x.day <= t)) + sum(sold.filter((v) => v.created >= f && v.created <= t), amt);
+    const dayTot = (i) => rangeTot(i, i);
+    const totT = sum(cash), totP = sum(sales), totV = sum(sold, amt);
+    const weekTot = totT + totP + totV;
+    const tod = sum(appts.filter((a) => a.day === TODAY && a.paid && !a.voucher)) + sum(allSales.filter((x) => x.day === TODAY)) + sum(vouchers.filter((v) => v.created === TODAY), amt);
+    // Barre: giorni della settimana, oppure settimane del mese
+    const bars = pk === 'mese'
+      ? MONTH_WEEKS.map(([f, t, l]) => ({ dn: l, d: '', f, t, today: TODAY >= f && TODAY <= t, future: f > TODAY }))
+      : DAYS.map((d, i) => ({ dn: d.dn, d: d.d, f: i, t: i, today: i === TODAY, future: i > TODAY }));
+    const vals = bars.map((b) => rangeTot(b.f, b.t));
+    const max = Math.max(1, ...vals);
+    const srcMax = Math.max(1, totT, totP, totV);
+    const opTot = ALLSTAFF.filter((s) => s.active).map((s) => ({ ...s, tot: sum(cash.filter((a) => a.op === s.id)) }));
+    const opMax = Math.max(1, ...opTot.map((o) => o.tot));
+    const expSoon = valid.filter((v) => v.expires !== null && v.expires !== undefined && v.expires <= TODAY + 30).sort((a, b) => a.expires - b.expires)
+      .map((v) => ({ ...v, amount: String(amt(v)).replace('.', ','), expLbl: dLbl(v.expires) }));
+    const sTod = allSales.filter((x) => x.day === TODAY);
+    return {
+      inToday: eur(tod),
+      inTodaySub: ((n) => (n === 1 ? '1 treatment paid' : n + ' treatments paid'))(cash.filter((a) => a.day === TODAY).length) + ' · ' + vend(sTod.length),
+      periods: Object.keys(PERIODS).map((k) => ({ label: PERIODS[k].label, pressed: k === pk ? 'true' : 'false', pick: () => this.setState({ period: k }) })),
+      periodSub: P.sub, periodLbl: P.label, inLbl: P.inLbl, untilLbl: P.until,
+      inSub: pk === 'mese' ? 'from 1 November to today' : 'from Monday 9 to today',
+      chartTitle: pk === 'mese' ? 'Takings week by week' : 'Takings day by day',
+      wkCls: 'wk' + (pk === 'mese' ? ' wk-5' : ''),
+      inWeek: eur(weekTot),
+      forecast: eur(sum(upcoming)),
+      forecastSub: upcoming.length === 1 ? '1 appointment still to come' : upcoming.length + ' appointments still to come',
+      week: bars.map((b, i) => ({
+        dn: b.dn, d: b.d,
+        lbl: b.future ? '—' : eur(vals[i]),
+        h: b.future ? 4 : Math.max(4, Math.round((vals[i] / max) * 140)),
+        cls: 'wk-col' + (b.today ? ' is-today' : ''),
+        aria: b.dn + ' ' + b.d + ': ' + (b.future ? 'not yet' : eur(vals[i])) + (b.today ? (pk === 'mese' ? ' (current week)' : ' (today)') : '')
+      })),
+      sources: [['Treatments', totT, '#A8395A'], ['Products', totP, '#2F7A6B'], ['Gift vouchers sold', totV, '#2A5F95']].map(([name, t, color]) => ({ name, tot: eur(t), pct: Math.round((t / srcMax) * 100), color, aria: name + ': ' + eur(t) })),
+      byOp: opTot.map((o) => ({ ...o, avCls: 'av av-sm bg-' + o.c, tot: eur(o.tot), pct: Math.round((o.tot / opMax) * 100), aria: o.name + ': ' + eur(o.tot) })),
+      due: due.map((a) => ({ ...a, from: fmt(a.s), dayLbl: dLbl(a.day), staffName: a.staff.name, priceLbl: eur(a.price) })),
+      noDue: due.length === 0,
+      prToday: eur(sum(sTod)), prTodayN: vend(sTod.length),
+      prWeek: eur(totP), prWeekN: vend(sales.length),
+      byProd: products.map((p) => {
+        const l = sales.filter((x) => x.pid === p.id);
+        return { name: p.name, nLbl: vend(l.length), left: p.stock <= 0 ? 'none in stock' : pz(p.stock) + ' in stock', tot: eur(sum(l)), low: p.stock <= 3, tag: p.stock <= 0 ? 'Sold out' : 'Running low', tagCls: 'tag ' + (p.stock <= 0 ? 'tag-danger' : 'tag-warn') };
+      }),
+      vSoldVal: eur(totV), vSoldN: sold.length === 1 ? '1 voucher' : sold.length + ' vouchers',
+      vValue: eur(sum(valid, amt)), vValidN: valid.length === 1 ? '1 voucher' : valid.length + ' vouchers',
+      expSoon, noExp: expSoon.length === 0,
+      noData: (this.state.items ? this.state.items.length === 0 : false) && allSales.length === 0 && vouchers.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

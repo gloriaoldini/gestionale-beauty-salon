@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create account</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb">
+<main class="onb">
+
+<div class="onb-top">
+<p class="t-small">Already have an account? <a class="link" href="Login.html">Sign in</a></p>
+</div>
+
+<div class="onb-card">
+<nav aria-label="Steps to create the account">
+<ol class="steps">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<li class="{{s.cls}}" aria-current="{{s.cur}}">
+<span class="bar" aria-hidden="true"></span>
+<span class="lab">
+<span class="num" aria-hidden="true">
+<sc-if value="{{s.done}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+<sc-if value="{{s.notDone}}" hint-placeholder-val="{{ true }}">{{s.n}}</sc-if>
+</span>
+<span class="txt">{{s.label}}<span class="sr">{{s.srState}}</span></span>
+</span>
+</li>
+</sc-for>
+</ol>
+</nav>
+
+<sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+<form onSubmit="{{next}}" novalidate>
+<p class="t-over">Step 1 of 3</p>
+<h1 class="serif t-h1" style="margin: 6px 0 8px">Create your account</h1>
+<p class="t-muted" style="margin-bottom: 28px">It’s the salon’s single sign-in: everyone uses it from the same computer. You’ll add the salon in the next step.</p>
+<div class="form-grid">
+<div class="field"><label for="su-nome">First name</label><input id="su-nome" class="input" type="text" autocomplete="given-name" placeholder="E.g. Bianca"></div>
+<div class="field"><label for="su-cognome">Last name</label><input id="su-cognome" class="input" type="text" autocomplete="family-name" placeholder="E.g. Neri"></div>
+<div class="field span2"><label for="su-email">Email</label><input id="su-email" class="input" type="email" autocomplete="email" placeholder="name@example.com" aria-describedby="su-email-h"><span id="su-email-h" class="hint">You’ll use it to sign in and get notifications.</span></div>
+<div class="field span2"><label for="su-pw">Password</label>
+<div class="pw"><input id="su-pw" class="input" type="{{pwType}}" autocomplete="new-password" placeholder="Create a password">
+<button type="button" class="pw-toggle" aria-controls="su-pw" onClick="{{togglePw}}">{{pwLabel}}</button></div>
+</div>
+<label class="check span2"><input type="checkbox">I accept the <a class="link" href="#" style="min-height: 0">terms of service</a> e l’<a class="link" href="#" style="min-height: 0">informativa privacy</a></label>
+</div>
+<div class="onb-ft">
+<div class="right"><button type="button" onClick="{{next}}" class="btn btn-primary btn-lg">Continue</button></div>
+</div>
+</form>
+</sc-if>
+
+<sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{next}}" novalidate>
+<p class="t-over">Step 2 of 3</p>
+<h1 class="serif t-h1" style="margin: 6px 0 8px">Your salon</h1>
+<p class="t-muted" style="margin-bottom: 28px">What is your salon called?</p>
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div class="field"><label for="su-centro">Salon name</label><input id="su-centro" class="input" type="text" value="Centro Lumen" aria-describedby="su-centro-h"><span id="su-centro-h" class="hint">You can change it any time from your Profile.</span></div>
+</div>
+<div class="onb-ft">
+<button type="button" class="btn btn-ghost" onClick="{{back}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>
+<div class="right"><button type="button" onClick="{{next}}" class="btn btn-primary btn-lg">Continue</button></div>
+</div>
+</form>
+</sc-if>
+
+<sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+<div>
+<p class="t-over">Step 3 of 3</p>
+<h1 class="serif t-h1" style="margin: 6px 0 8px">Your staff</h1>
+<p class="t-muted" style="margin-bottom: 28px">Add the people who work at the salon and choose a colour for each: you’ll see it in the calendar. You can change them any time from the Team page.</p>
+<div class="inv-list">
+<sc-for list="{{ops}}" as="o" hint-placeholder-count="3">
+<div class="inv-row op-row">
+<div class="field inv-em"><label for="{{o.nId}}">First name</label><input id="{{o.nId}}" class="input" type="text" placeholder="E.g. Bianca" value="{{o.nome}}" onInput="{{o.setNome}}"></div>
+<div class="field inv-ro"><span class="lbl">Colour</span>
+<div class="swatches" role="radiogroup" aria-label="{{o.colorAria}}">
+<sc-for list="{{o.colors}}" as="c" hint-placeholder-count="5"><button type="button" role="radio" class="sw-opt" aria-checked="{{c.checked}}" aria-label="{{c.aria}}" disabled="{{c.used}}" onClick="{{c.pick}}"><i class="{{c.cls}}"></i></button></sc-for>
+<button type="button" role="radio" class="sw-opt sw-custom" aria-checked="{{o.customChecked}}" aria-expanded="{{o.pickOpenS}}" aria-label="{{o.customAria}}" disabled="{{o.customUsed}}" onClick="{{o.togglePick}}"><i style="{{o.customStyle}}"></i></button>
+</div>
+<sc-if value="{{o.pickOpen}}" hint-placeholder-val="{{ false }}">
+<div class="cpick" role="group" aria-label="{{o.pickAria}}">
+<div class="cwheel" role="img" aria-label="Colour wheel: click or drag to choose" onMouseDown="{{o.wheelDown}}" onMouseMove="{{o.wheelMove}}" onMouseUp="{{o.wheelUp}}" onMouseLeave="{{o.wheelUp}}" onClick="{{o.wheelClick}}" onTouchStart="{{o.wheelTouch}}" onTouchMove="{{o.wheelTouch}}">
+<span class="cwheel-dark" style="opacity: {{o.darkOp}}"></span>
+<span class="cwheel-dot" style="left: {{o.dotX}}%; top: {{o.dotY}}%; background: {{o.hex}}"></span>
+</div>
+<div class="field"><label for="{{o.lumId}}">Brightness</label><input id="{{o.lumId}}" class="crange" type="range" min="15" max="100" value="{{o.vPct}}" onInput="{{o.setV}}" onChange="{{o.setV}}" style="background: linear-gradient(to right, #000, {{o.pureHex}})"></div>
+<div class="cpick-prev"><span style="background: {{o.hex}}" aria-hidden="true"></span><span class="t-small">Selected colour <b>{{o.hex}}</b></span></div>
+<div class="field"><label for="{{o.hexId}}">Or type the code</label><input id="{{o.hexId}}" class="input" type="text" placeholder="#7B5BD6" value="{{o.hexIn}}" onInput="{{o.setHexIn}}" autocomplete="off" spellcheck="false"></div>
+<sc-if value="{{o.badHex}}" hint-placeholder-val="{{ false }}"><p class="sw-warn">Type a code like #7B5BD6.</p></sc-if>
+<button type="button" class="btn btn-secondary btn-sm" style="align-self: flex-end" onClick="{{o.closePick}}">Done</button>
+</div>
+</sc-if>
+<sc-if value="{{o.lowContrast}}" hint-placeholder-val="{{ false }}"><p class="sw-warn" role="status">Colour too light: white text would be hard to read in the calendar. Pick a darker one.</p></sc-if>
+</div>
+<button type="button" class="icon-btn inv-rm" aria-label="{{o.rmLabel}}" onClick="{{o.remove}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button>
+</div>
+</sc-for>
+</div>
+<button type="button" class="btn btn-ghost" style="margin-top: 12px" onClick="{{addOp}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add another staff member</button>
+
+<div class="onb-ft">
+<button type="button" class="btn btn-ghost" onClick="{{back}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>
+<div class="right">
+<a class="btn btn-secondary btn-lg" href="Home.html" onClick="{{startEmpty}}">Skip for now</a>
+<a class="btn btn-primary btn-lg" href="Home.html" onClick="{{startEmpty}}">Go to the calendar</a>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["1","2","3"],"default":"1"},"$preview":{"width":1440,"height":1000}}'>
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+// Conversioni colore per la ruota (HSV <-> esadecimale)
+function hsvToHex({ h, s, v }) {
+  const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+  return '#' + [f(5), f(3), f(1)].map((x) => Math.round(x * 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+function hexToHsv(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.substr(i, 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: (h * 60 + 360) % 360, s: mx ? d / mx : 0, v: mx };
+}
+class Component extends DCLogic {
+  componentDidMount() { applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {} }
+  renderVals() {
+    const step = this.state.step ?? Number(this.props.step ?? 1);
+    const showPw = !!this.state.showPw;
+    const COLORS = [['c1', 'Purple'], ['c2', 'Teal'], ['c3', 'Amber'], ['c4', 'Blue'], ['c5', 'Green']];
+    const c6hex = this.state.c6hex || '';
+    // Contrasto del testo bianco sul colore scelto (WCAG AA: almeno 4,5)
+    const lum = (h) => { const v = [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4))); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const okWhite = (h) => !h || 1.05 / (lum(h) + 0.05) >= 4.5;
+    const setC6 = (id, hex, typed, hsv) => {
+      try { document.documentElement.style.setProperty('--c6x', hex); document.documentElement.style.setProperty('--c6x-50', hex + '24'); } catch (er) {}
+      this.setState({ c6hex: hex, hexIn: typed, hsv: hsv || hexToHsv(hex), ops: ops.map((x) => (x.id === id ? { ...x, c: 'c6' } : x)) });
+    };
+    const ops = this.state.ops ?? [
+      { id: 1, nome: 'Bianca', c: 'c1' },
+      { id: 2, nome: 'Chiara', c: 'c2' },
+      { id: 3, nome: '', c: 'c3' }
+    ];
+    const setOp = (id, patch) => this.setState({ ops: ops.map(o => o.id === id ? { ...o, ...patch } : o) });
+    const labels = ['Account', 'Salon', 'Team'];
+    const steps = labels.map((label, i) => {
+      const n = i + 1;
+      const done = n < step, cur = n === step;
+      return {
+        n, label, done, notDone: !done,
+        cls: 'step' + (done ? ' is-done' : '') + (cur ? ' is-current' : ''),
+        cur: cur ? 'step' : undefined,
+        srState: done ? ' (completed)' : (cur ? ' (current step)' : '')
+      };
+    });
+    return {
+      steps,
+      s1: step === 1, s2: step === 2, s3: step === 3,
+      pwType: showPw ? 'text' : 'password',
+      pwLabel: showPw ? 'Hide' : 'Show',
+      togglePw: () => this.setState({ showPw: !showPw }),
+      next: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ step: Math.min(3, step + 1) }); },
+      back: () => this.setState({ step: Math.max(1, step - 1) }),
+      ops: ops.map((o, idx) => {
+        const used = ops.filter(x => x.id !== o.id).map(x => x.c);
+        const who = o.nome.trim() || ('staff member ' + (idx + 1));
+        return {
+          ...o,
+          nId: 'op-n-' + o.id,
+          colorAria: 'Colour of ' + who,
+          rmLabel: 'Remove ' + who,
+          setNome: (e) => setOp(o.id, { nome: e.target.value }),
+          remove: () => this.setState({ ops: ops.filter(x => x.id !== o.id) }),
+          hex: c6hex || '#7B5BD6',
+          customChecked: o.c === 'c6' && c6hex ? 'true' : 'false',
+          customUsed: used.includes('c6'),
+          customAria: 'Custom colour of ' + who + (used.includes('c6') ? ', already used' : ''),
+          customStyle: o.c === 'c6' && c6hex ? 'background: ' + c6hex : '',
+          lowContrast: o.c === 'c6' && !!c6hex && !okWhite(c6hex),
+          pickOpen: this.state.pickFor === o.id, pickOpenS: this.state.pickFor === o.id ? 'true' : 'false',
+          pickAria: 'Custom colour of ' + who,
+          togglePick: () => this.setState({ pickFor: this.state.pickFor === o.id ? null : o.id, hexIn: c6hex, hsv: hexToHsv(c6hex || '#7B5BD6') }),
+          closePick: () => this.setState({ pickFor: null }),
+          hexId: 'hex-' + o.id,
+          hexIn: this.state.hexIn ?? c6hex,
+          badHex: !!(this.state.hexIn && !/^#?[0-9a-fA-F]{6}$/.test(this.state.hexIn.trim())),
+          setHexIn: (e) => {
+            const raw = e.target.value.trim();
+            if (/^#?[0-9a-fA-F]{6}$/.test(raw)) { const hx = (raw[0] === '#' ? raw : '#' + raw).toUpperCase(); setC6(o.id, hx, raw, hexToHsv(hx)); }
+            else this.setState({ hexIn: raw });
+          },
+          ...(() => {
+            const hsv = this.state.hsv || hexToHsv(c6hex || '#7B5BD6');
+            const rad = hsv.h * Math.PI / 180;
+            const fromEvent = (e) => {
+              const t = (e.currentTarget && e.currentTarget.getBoundingClientRect) ? e.currentTarget : (e.target && e.target.closest ? e.target.closest('.cwheel') : null);
+              if (!t) return;
+              const r = t.getBoundingClientRect();
+              const pt = e.touches && e.touches[0] ? e.touches[0] : e;
+              const x = pt.clientX - r.left - r.width / 2, y = pt.clientY - r.top - r.height / 2;
+              const sat = Math.min(1, Math.hypot(x, y) / (r.width / 2));
+              const hue = (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360;
+              const n = { h: hue, s: sat, v: hsv.v };
+              setC6(o.id, hsvToHex(n), hsvToHex(n), n);
+            };
+            return {
+              lumId: 'lum-' + o.id,
+              dotX: (50 + hsv.s * 50 * Math.sin(rad)).toFixed(1), dotY: (50 - hsv.s * 50 * Math.cos(rad)).toFixed(1),
+              darkOp: (1 - hsv.v).toFixed(2), vPct: Math.round(hsv.v * 100),
+              pureHex: hsvToHex({ h: hsv.h, s: hsv.s, v: 1 }),
+              wheelDown: (e) => { this._drag = true; if (e && e.preventDefault) e.preventDefault(); fromEvent(e); },
+              wheelMove: (e) => { if (this._drag) fromEvent(e); },
+              wheelUp: () => { this._drag = false; },
+              wheelClick: (e) => fromEvent(e),
+              wheelTouch: (e) => { if (e && e.preventDefault) e.preventDefault(); fromEvent(e); },
+              setV: (e) => { const n = { ...hsv, v: Number(e.target.value) / 100 }; setC6(o.id, hsvToHex(n), hsvToHex(n), n); }
+            };
+          })(),
+          colors: COLORS.map(([c, name]) => ({
+            cls: 'bg-' + c, checked: c === o.c ? 'true' : 'false', used: used.includes(c),
+            aria: name + (used.includes(c) ? ', already used' : ''),
+            pick: () => setOp(o.id, { c })
+          }))
+        };
+      }),
+      // Primo accesso: il centro parte vuoto, con le sole operatrici inserite qui
+      startEmpty: () => {
+        const members = ops.filter((o) => o.nome.trim()).map((o, i) => ({ id: 'm' + (i + 1), nome: o.nome.trim(), cognome: '', c: o.c, active: true }));
+        const data = { items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [], members };
+        if (c6hex && ops.some((o) => o.c === 'c6')) data.c6hex = c6hex;
+        try { window.localStorage.setItem('gb-demo-v4', JSON.stringify(data)); } catch (e) {}
+      },
+      addOp: () => {
+        const used = ops.map(x => x.c);
+        const free = COLORS.find(([c]) => !used.includes(c));
+        this.setState({ ops: [...ops, { id: Date.now(), nome: '', c: free ? free[0] : 'c1' }] });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

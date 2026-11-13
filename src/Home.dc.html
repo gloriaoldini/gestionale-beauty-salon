@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Calendar · Home</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="calendario" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<h1 class="sr">Calendar</h1>
+
+<div class="cal-bar">
+<div class="filter" role="group" aria-label="Filter by staff member">
+<button type="button" class="chip chip-all" aria-pressed="{{allPressed}}" onClick="{{showAll}}">
+<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>All staff</button>
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+<button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.toggle}}">
+<span class="{{c.avCls}}" aria-hidden="true">{{c.ini}}</span>{{c.short}}
+<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+</button>
+</sc-for>
+</div>
+<div class="cal-actions">
+<div class="seg" role="group" aria-label="Calendar view">
+<sc-for list="{{views}}" as="v" hint-placeholder-count="3"><button type="button" aria-pressed="{{v.pressed}}" onClick="{{v.pick}}">{{v.label}}</button></sc-for>
+</div>
+<button type="button" class="btn btn-primary" onClick="{{newFromButton}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New appointment</button>
+</div>
+</div>
+
+<div class="month-row">
+<sc-if value="{{isMonth}}" hint-placeholder-val="{{ false }}"><button type="button" class="icon-btn" aria-label="{{prevLbl}}" onClick="{{goPrev}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button></sc-if>
+<h2 class="month-lbl" aria-live="polite">{{monthLbl}}<span class="sr"> · {{rangeLbl}}</span></h2>
+<sc-if value="{{isMonth}}" hint-placeholder-val="{{ false }}"><button type="button" class="icon-btn" aria-label="{{nextLbl}}" onClick="{{goNext}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
+</div>
+
+<sc-if value="{{isGrid}}" hint-placeholder-val="{{ true }}">
+<section class="{{weekCls}}" aria-label="{{gridAria}}">
+<div class="week-hd">
+<div class="hd-nav"><button type="button" class="icon-btn" aria-label="{{prevLbl}}" onClick="{{goPrev}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button></div>
+<sc-for list="{{cols}}" as="d" hint-placeholder-count="6">
+<div class="{{d.hdCls}}" aria-current="{{d.cur}}">
+<span class="dn">{{d.dn}}</span><span class="dd">{{d.dnum}}</span>
+<sc-if value="{{d.isLast}}" hint-placeholder-val="{{ false }}"><button type="button" class="icon-btn hd-next" aria-label="{{nextLbl}}" onClick="{{goNext}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
+</div>
+</sc-for>
+</div>
+<div class="week-bd">
+<div class="times" aria-hidden="true">
+<sc-for list="{{hours}}" as="h" hint-placeholder-count="11">
+<span style="top: {{h.top}}px">{{h.label}}</span>
+</sc-for>
+</div>
+<sc-for list="{{cols}}" as="d" hint-placeholder-count="6">
+<div class="{{d.colCls}}" role="group" aria-label="{{d.full}}" onClick="{{d.click}}" onMouseMove="{{d.move}}" onMouseLeave="{{d.leave}}" onDragOver="{{d.dragOver}}" onDrop="{{d.drop}}" onDragLeave="{{d.leave}}">
+<sc-if value="{{d.isToday}}" hint-placeholder-val="{{ false }}"><div class="now" style="top: 84px" aria-hidden="true"></div></sc-if>
+<sc-if value="{{d.ghost.show}}" hint-placeholder-val="{{ false }}">
+<div class="{{d.ghost.cls}}" style="top: {{d.ghost.top}}px; height: {{d.ghost.h}}px" aria-hidden="true">{{d.ghost.label}}</div>
+</sc-if>
+<sc-for list="{{d.list}}" as="a" hint-placeholder-count="3">
+<button type="button" class="{{a.cls}}" draggable="true" aria-label="{{a.label}}" aria-expanded="{{a.expanded}}" onClick="{{a.click}}" onDragStart="{{a.dragStart}}" onDragEnd="{{a.dragEnd}}" style="top: {{a.top}}px; height: {{a.h}}px; left: calc({{a.left}}% + 3px); width: calc({{a.w}}% - 6px)">
+<span class="ah"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>{{a.from}} – {{a.to}}
+<sc-if value="{{a.hasCNote}}" hint-placeholder-val="{{ false }}"><svg class="note-ic" style="color: #8A5300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg></sc-if>
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><svg class="note-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h4"></path></svg></sc-if>
+</span>
+<span class="nm">{{a.client}}</span>
+<span class="tr">{{a.tr}}</span>
+</button>
+</sc-for>
+</div>
+</sc-for>
+
+<sc-if value="{{popInGrid}}" hint-placeholder-val="{{ false }}">
+<div class="pop" role="dialog" aria-label="Appointment details" style="top: {{pop.top}}px; left: {{pop.left}}">
+<div class="pop-hd"><h3>{{pop.title}}</h3><button type="button" class="icon-btn" aria-label="Close details" onClick="{{closePop}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="pop-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{pop.when}}</div>
+<sc-if value="{{pop.isAppt}}" hint-placeholder-val="{{ true }}">
+<div class="pay-row"><span class="{{pop.payCls}}"><span class="dot"></span>{{pop.pay}}</span>
+<div class="pay-acts">
+<sc-if value="{{pop.canVoucher}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary btn-sm" aria-expanded="{{pop.vOpenS}}" onClick="{{pop.toggleV}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13"></path></svg>Use a voucher</button></sc-if>
+<button type="button" class="btn btn-secondary btn-sm" onClick="{{pop.togglePay}}">{{pop.payBtn}}</button>
+</div></div>
+<sc-if value="{{pop.vOpen}}" hint-placeholder-val="{{ false }}">
+<fieldset class="vpick">
+<legend>Choose the voucher · {{pop.vCount}} valid</legend>
+<div class="vlist">
+<sc-for list="{{pop.vList}}" as="b" hint-placeholder-count="3">
+<button type="button" class="vopt" aria-pressed="{{b.pressed}}" onClick="{{b.pick}}">
+<span class="vopt-tx"><b>{{b.svc}} · € {{b.amount}}</b><small>For {{b.to}} · <span class="code">{{b.code}}</span></small>
+<sc-if value="{{b.match}}" hint-placeholder-val="{{ false }}"><span class="tag tag-ok">{{b.matchLbl}}</span></sc-if></span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{pop.vWarn}}" hint-placeholder-val="{{ false }}"><p class="t-small" style="color: #8A5300">This voucher is for a different treatment: check before using it.</p></sc-if>
+<div style="display: flex; gap: 8px; justify-content: flex-end">
+<button type="button" class="btn btn-secondary btn-sm" onClick="{{pop.cancelV}}">Cancel</button>
+<sc-if value="{{pop.hasPick}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary btn-sm" onClick="{{pop.payV}}">Pay with the voucher</button></sc-if>
+</div>
+</fieldset>
+</sc-if>
+</sc-if>
+<div class="pop-grid">
+<div class="person"><span class="{{pop.opAv}}" aria-hidden="true">{{pop.opIni}}</span><span><b>{{pop.opName}}</b><small>Staff member</small></span></div>
+<sc-if value="{{pop.isAppt}}" hint-placeholder-val="{{ true }}"><div class="person"><span class="av av-sm bg-neutral" aria-hidden="true">{{pop.clIni}}</span><span><b><a href="ClienteScheda.html" onClick="{{pop.openScheda}}" style="color: #2A2325; text-underline-offset: 3px">{{pop.client}}</a></b><small>Client · profile</small></span></div></sc-if>
+</div>
+<sc-if value="{{pop.hasCNote}}" hint-placeholder-val="{{ false }}"><div class="cnote-box"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>Client note</b><span>{{pop.cnote}}</span></div></sc-if>
+<sc-if value="{{pop.hasNote}}" hint-placeholder-val="{{ false }}"><div class="note-box"><b>{{pop.noteTitle}}</b><span>{{pop.note}}</span></div></sc-if>
+<sc-if value="{{pop.noNote}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<textarea class="textarea" aria-label="{{pop.noteTitle}}" placeholder="{{pop.notePh}}" value="{{noteDraft}}" onInput="{{setNoteDraft}}"></textarea>
+<button type="button" class="btn btn-secondary btn-sm" style="align-self: flex-end" onClick="{{saveNote}}">Save note</button>
+</div>
+</sc-if>
+<div class="pop-ft has-del"><button type="button" class="icon-btn danger" aria-label="{{pop.delLbl}}" onClick="{{pop.del}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button><button type="button" class="btn btn-secondary" onClick="{{pop.dup}}">Duplicate</button><button type="button" class="btn btn-primary" onClick="{{pop.edit}}">Edit</button></div>
+</div>
+</sc-if>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isMonth}}" hint-placeholder-val="{{ false }}">
+<section class="month" aria-label="{{rangeLbl}}">
+<div class="m-hd" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+<div class="m-grid">
+<sc-for list="{{mcells}}" as="c" hint-placeholder-count="30">
+<div class="{{c.cls}}">
+<button type="button" class="m-day" aria-label="{{c.aria}}" onClick="{{c.open}}">{{c.n}}</button>
+<sc-for list="{{c.items}}" as="a" hint-placeholder-count="2"><button type="button" class="m-it" aria-label="{{a.label}}" onClick="{{a.mClick}}"><span class="{{a.dotCls}}" aria-hidden="true"></span><span class="m-t">{{a.from}}</span><span class="m-n">{{a.client}}</span></button></sc-for>
+<sc-if value="{{c.more}}" hint-placeholder-val="{{ false }}"><button type="button" class="m-more" onClick="{{c.open}}">+{{c.moreN}} more</button></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<section class="agenda" aria-label="{{phAria}}">
+
+<sc-if value="{{isWeekV}}" hint-placeholder-val="{{ false }}">
+<div class="ph-nav">
+<button type="button" class="icon-btn" aria-label="Previous week" onClick="{{phPrev}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<b aria-live="polite">{{rangeLbl}}</b>
+<button type="button" class="icon-btn" aria-label="Next week" onClick="{{phNext}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+<div class="ph-week">
+<sc-for list="{{phWeek}}" as="g" hint-placeholder-count="6">
+<div class="{{g.cls}}">
+<h3>{{g.title}}</h3>
+<sc-if value="{{g.empty}}" hint-placeholder-val="{{ false }}"><p class="ph-empty">No appointments</p></sc-if>
+<ul class="ag-list">
+<sc-for list="{{g.items}}" as="a" hint-placeholder-count="3">
+<li>
+<button type="button" class="{{a.agCls}}" aria-label="{{a.label}}" onClick="{{a.click}}">
+<span class="ag-time">{{a.from}}<small>{{a.to}}</small></span>
+<span class="ag-main">
+<span class="ag-nm">{{a.client}}</span>
+<span class="t-small" style="color: #4F4446">{{a.tr}}</span>
+<span class="ag-who"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>{{a.staff.name}}
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="margin-left: auto">Notes</span></sc-if>
+</span>
+<sc-if value="{{a.hasCNote}}" hint-placeholder-val="{{ false }}"><span class="cnote-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>{{a.cnote}}</span></sc-if>
+</span>
+</button>
+</li>
+</sc-for>
+</ul>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isMonth}}" hint-placeholder-val="{{ false }}">
+<div class="pm-hd" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span></div>
+<div class="pm-grid" role="group" aria-label="Days of the month">
+<sc-for list="{{mcells}}" as="c" hint-placeholder-count="30">
+<button type="button" class="{{c.pmCls}}" aria-pressed="{{c.pmSel}}" aria-label="{{c.pmAria}}" disabled="{{c.out}}" onClick="{{c.pick}}">{{c.n}}<span class="pm-dots" aria-hidden="true"><sc-for list="{{c.dots}}" as="t" hint-placeholder-count="2"><i class="{{t}}"></i></sc-for></span></button>
+</sc-for>
+</div>
+<h2 class="t-h3" style="margin: 20px 0 12px">{{mDayTitle}}</h2>
+<sc-if value="{{mEmpty}}" hint-placeholder-val="{{ false }}"><div class="card t-muted">No appointments on this day.</div></sc-if>
+<ul class="ag-list">
+<sc-for list="{{mAgenda}}" as="a" hint-placeholder-count="3">
+<li>
+<button type="button" class="{{a.agCls}}" aria-label="{{a.label}}" onClick="{{a.click}}">
+<span class="ag-time">{{a.from}}<small>{{a.to}}</small></span>
+<span class="ag-main">
+<span class="ag-nm">{{a.client}}</span>
+<span class="t-small" style="color: #4F4446">{{a.tr}}</span>
+<span class="ag-who"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>{{a.staff.name}}
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="margin-left: auto">Notes</span></sc-if>
+</span>
+<sc-if value="{{a.hasCNote}}" hint-placeholder-val="{{ false }}"><span class="cnote-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>{{a.cnote}}</span></sc-if>
+</span>
+</button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+
+<sc-if value="{{isDayV}}" hint-placeholder-val="{{ false }}">
+<div class="days" role="group" aria-label="Choose the day">
+<button type="button" class="icon-btn" aria-label="Previous week" onClick="{{phPrev}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<sc-for list="{{dayBtns}}" as="b" hint-placeholder-count="6">
+<button type="button" class="{{b.cls}}" aria-pressed="{{b.pressed}}" aria-label="{{b.full}}" onClick="{{b.pick}}">{{b.dn}}<b>{{b.dnum}}</b></button>
+</sc-for>
+<button type="button" class="icon-btn" aria-label="Next week" onClick="{{phNext}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+<h2 class="t-h3" style="margin-bottom: 12px">{{dayTitle}}</h2>
+<sc-if value="{{agEmpty}}" hint-placeholder-val="{{ false }}">
+<div class="card t-muted">No appointments on this day.</div>
+</sc-if>
+<ul class="ag-list">
+<sc-for list="{{agenda}}" as="a" hint-placeholder-count="4">
+<li>
+<button type="button" class="{{a.agCls}}" aria-label="{{a.label}}" onClick="{{a.click}}">
+<span class="ag-time">{{a.from}}<small>{{a.to}}</small></span>
+<span class="ag-main">
+<span class="ag-nm">{{a.client}}</span>
+<span class="t-small" style="color: #4F4446">{{a.tr}}</span>
+<span class="ag-who"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>{{a.staff.name}}
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="margin-left: auto">Notes</span></sc-if>
+</span>
+<sc-if value="{{a.hasCNote}}" hint-placeholder-val="{{ false }}"><span class="cnote-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>{{a.cnote}}</span></sc-if>
+</span>
+</button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</section>
+
+</main>
+
+<sc-if value="{{popInSheet}}" hint-placeholder-val="{{ false }}">
+<div class="sheet-ov" onClick="{{sheetOvClick}}">
+<div class="pop" role="dialog" aria-label="Appointment details">
+<div class="pop-hd"><h3>{{pop.title}}</h3><button type="button" class="icon-btn" aria-label="Close details" onClick="{{closePop}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="pop-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{pop.when}}</div>
+<sc-if value="{{pop.isAppt}}" hint-placeholder-val="{{ true }}">
+<div class="pay-row"><span class="{{pop.payCls}}"><span class="dot"></span>{{pop.pay}}</span>
+<div class="pay-acts">
+<sc-if value="{{pop.canVoucher}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary btn-sm" aria-expanded="{{pop.vOpenS}}" onClick="{{pop.toggleV}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13"></path></svg>Use a voucher</button></sc-if>
+<button type="button" class="btn btn-secondary btn-sm" onClick="{{pop.togglePay}}">{{pop.payBtn}}</button>
+</div></div>
+<sc-if value="{{pop.vOpen}}" hint-placeholder-val="{{ false }}">
+<fieldset class="vpick">
+<legend>Choose the voucher · {{pop.vCount}} valid</legend>
+<div class="vlist">
+<sc-for list="{{pop.vList}}" as="b" hint-placeholder-count="3">
+<button type="button" class="vopt" aria-pressed="{{b.pressed}}" onClick="{{b.pick}}">
+<span class="vopt-tx"><b>{{b.svc}} · € {{b.amount}}</b><small>For {{b.to}} · <span class="code">{{b.code}}</span></small>
+<sc-if value="{{b.match}}" hint-placeholder-val="{{ false }}"><span class="tag tag-ok">{{b.matchLbl}}</span></sc-if></span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{pop.vWarn}}" hint-placeholder-val="{{ false }}"><p class="t-small" style="color: #8A5300">This voucher is for a different treatment: check before using it.</p></sc-if>
+<div style="display: flex; gap: 8px; justify-content: flex-end">
+<button type="button" class="btn btn-secondary btn-sm" onClick="{{pop.cancelV}}">Cancel</button>
+<sc-if value="{{pop.hasPick}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary btn-sm" onClick="{{pop.payV}}">Pay with the voucher</button></sc-if>
+</div>
+</fieldset>
+</sc-if>
+</sc-if>
+<div class="pop-grid">
+<div class="person"><span class="{{pop.opAv}}" aria-hidden="true">{{pop.opIni}}</span><span><b>{{pop.opName}}</b><small>Staff member</small></span></div>
+<sc-if value="{{pop.isAppt}}" hint-placeholder-val="{{ true }}"><div class="person"><span class="av av-sm bg-neutral" aria-hidden="true">{{pop.clIni}}</span><span><b><a href="ClienteScheda.html" onClick="{{pop.openScheda}}" style="color: #2A2325; text-underline-offset: 3px">{{pop.client}}</a></b><small>Client · profile</small></span></div></sc-if>
+</div>
+<sc-if value="{{pop.hasCNote}}" hint-placeholder-val="{{ false }}"><div class="cnote-box"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>Client note</b><span>{{pop.cnote}}</span></div></sc-if>
+<sc-if value="{{pop.hasNote}}" hint-placeholder-val="{{ false }}"><div class="note-box"><b>{{pop.noteTitle}}</b><span>{{pop.note}}</span></div></sc-if>
+<sc-if value="{{pop.noNote}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<textarea class="textarea" aria-label="{{pop.noteTitle}}" placeholder="{{pop.notePh}}" value="{{noteDraft}}" onInput="{{setNoteDraft}}"></textarea>
+<button type="button" class="btn btn-secondary btn-sm" style="align-self: flex-end" onClick="{{saveNote}}">Save note</button>
+</div>
+</sc-if>
+<div class="pop-ft has-del"><button type="button" class="icon-btn danger" aria-label="{{pop.delLbl}}" onClick="{{pop.del}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button><button type="button" class="btn btn-secondary" onClick="{{pop.dup}}">Duplicate</button><button type="button" class="btn btn-primary" onClick="{{pop.edit}}">Edit</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{drOpen}}" hint-placeholder-val="{{ false }}">
+<div class="drawer-ov" onClick="{{drOvClick}}">
+<div class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">
+<div class="dr-hd">
+<h2 id="dr-t" class="t-h3">{{dr.title}}</h2>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{closeDr}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="tabs" role="tablist" aria-label="What do you want to add">
+<button type="button" role="tab" id="tab-a" class="tab" aria-selected="{{dr.selA}}" aria-controls="panel-a" onClick="{{dr.toA}}">Appointment</button>
+<button type="button" role="tab" id="tab-b" class="tab" aria-selected="{{dr.selB}}" aria-controls="panel-b" onClick="{{dr.toB}}">Block time</button>
+</div>
+<div class="dr-bd">
+
+<div>
+<h3 class="sec-t">When</h3>
+<div class="{{dr.whenCls}}">
+<div class="field datef">
+<span class="lbl">Date</span>
+<button type="button" class="input date-btn" aria-label="{{dr.dateAria}}" aria-expanded="{{dr.pickerExp}}" onClick="{{dr.togglePicker}}">{{dr.dateTxt}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg></button>
+<sc-if value="{{dr.picker}}" hint-placeholder-val="{{ false }}">
+<div class="dp" role="dialog" aria-label="Choose the date">
+<div class="dp-hd"><button type="button" class="icon-btn" aria-label="Previous month" onClick="{{dr.pmPrev}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><span aria-live="polite">{{dr.pmLbl}}</span><button type="button" class="icon-btn" aria-label="Next month" onClick="{{dr.pmNext}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></div>
+<div class="dp-grid">
+<sc-for list="{{dows}}" as="w" hint-placeholder-count="7"><span class="dp-dow" aria-hidden="true">{{w}}</span></sc-for>
+<sc-for list="{{dr.cells}}" as="c" hint-placeholder-count="42"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" disabled="{{c.out}}" onClick="{{c.pick}}">{{c.n}}</button></sc-for>
+</div>
+<div class="dp-ft"><button type="button" class="btn btn-ghost btn-sm" onClick="{{dr.goToday}}">Go to today</button><span class="t-small t-muted">Grey: week in view</span></div>
+</div>
+</sc-if>
+</div>
+<div class="field"><label for="d-start">{{dr.startLbl}}</label>
+<dc-import name="Select" uid="d-start" label="{{dr.startLbl}}" options="{{timeOpts}}" value="{{dr.start}}" on-change="{{dr.setStart}}" hint-size="100%,52px"></dc-import>
+</div>
+<sc-if value="{{dr.isB}}" hint-placeholder-val="{{ false }}">
+<div class="field"><label for="b-end">End</label>
+<dc-import name="Select" uid="b-end" label="End" options="{{endOpts}}" value="{{dr.end}}" invalid="{{dr.errEnd}}" on-change="{{dr.setEnd}}" hint-size="100%,52px"></dc-import>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{dr.errEnd}}" hint-placeholder-val="{{ false }}"><span class="err" style="margin-top: 8px">The end must be after the start</span></sc-if>
+</div>
+
+<sc-if value="{{dr.isA}}" hint-placeholder-val="{{ true }}">
+<div role="tabpanel" id="panel-a" aria-labelledby="tab-a" style="display: flex; flex-direction: column; gap: 24px">
+<div class="field"><span class="lbl" id="a-client-l">Client</span>
+<sc-if value="{{dr.cPicked}}" hint-placeholder-val="{{ false }}">
+<div class="picked"><span class="av av-sm bg-neutral" aria-hidden="true">{{dr.pc.ini}}</span><span class="info"><b>{{dr.pc.name}}</b><small>{{dr.pc.contact}}</small></span><button type="button" class="btn btn-ghost btn-sm" aria-label="Change client" onClick="{{dr.cChange}}">Change</button></div>
+</sc-if>
+<sc-if value="{{dr.cSearch}}" hint-placeholder-val="{{ true }}">
+<div class="cbx">
+<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input id="a-client" class="{{dr.clientCls}}" type="text" role="combobox" aria-labelledby="a-client-l" aria-autocomplete="list" aria-expanded="{{dr.cExp}}" aria-controls="a-client-list" autocomplete="off" placeholder="Search by name or mobile" value="{{dr.cq}}" onInput="{{dr.setCq}}" onFocus="{{dr.cFocus}}" aria-invalid="{{dr.errClientS}}"></div>
+<sc-if value="{{dr.cOpen}}" hint-placeholder-val="{{ false }}">
+<ul id="a-client-list" class="cbx-list" role="listbox" aria-label="Clients">
+<sc-for list="{{dr.cMatches}}" as="c" hint-placeholder-count="5"><li role="none"><button type="button" role="option" aria-selected="false" class="cbx-opt" onClick="{{c.pick}}"><span class="av av-sm bg-neutral" aria-hidden="true">{{c.ini}}</span><span>{{c.full}}<small>{{c.tel}}</small></span></button></li></sc-for>
+<sc-if value="{{dr.cNone}}" hint-placeholder-val="{{ false }}"><li role="none" class="t-small t-muted" style="padding: 10px 12px">No client found with this name</li></sc-if>
+<li role="none"><button type="button" role="option" aria-selected="false" class="cbx-opt cbx-new" onClick="{{dr.cNew}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{dr.cNewLbl}}</button></li>
+</ul>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{dr.cNewMode}}" hint-placeholder-val="{{ false }}">
+<div class="newc" role="group" aria-labelledby="nc-t">
+<div class="newc-hd"><b id="nc-t">New client</b><button type="button" class="btn btn-ghost btn-sm" onClick="{{dr.cCancelNew}}">Search clients</button></div>
+<div class="row2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)">
+<div class="field"><label for="nc-nome">First name</label><input id="nc-nome" class="{{dr.ncNomeCls}}" type="text" autocomplete="off" value="{{dr.nc.nome}}" onInput="{{dr.setNcNome}}"></div>
+<div class="field"><label for="nc-cognome">Last name</label><input id="nc-cognome" class="{{dr.ncCognomeCls}}" type="text" autocomplete="off" value="{{dr.nc.cognome}}" onInput="{{dr.setNcCognome}}"></div>
+</div>
+<div class="field"><label for="nc-tel">Mobile</label><input id="nc-tel" class="{{dr.ncContactCls}}" type="tel" inputmode="tel" autocomplete="off" placeholder="+39 …" value="{{dr.nc.tel}}" onInput="{{dr.setNcTel}}"></div>
+<div class="field"><label for="nc-email">Email <span class="t-muted" style="font-weight: 400">(optional)</span></label><input id="nc-email" class="{{dr.ncContactCls}}" type="email" autocomplete="off" placeholder="name@example.com" value="{{dr.nc.email}}" onInput="{{dr.setNcEmail}}"></div>
+<sc-if value="{{dr.errNc}}" hint-placeholder-val="{{ false }}"><span class="err">{{dr.errNcMsg}}</span></sc-if>
+<p class="hint">When you save the appointment, the client is also added to the Clients page.</p>
+</div>
+</sc-if>
+<sc-if value="{{dr.errClient}}" hint-placeholder-val="{{ false }}"><span class="err">Choose a client or add a new one</span></sc-if>
+</div>
+<sc-if value="{{dr.showCNote}}" hint-placeholder-val="{{ false }}">
+<div class="field"><label for="a-cnote">Client note <span class="lbl-sub">· always stays on the client’s profile</span></label>
+<textarea id="a-cnote" class="{{dr.cnoteCls}}" placeholder="E.g. latex allergy, sensitive skin…" value="{{dr.cnote}}" onInput="{{dr.setCnote}}"></textarea>
+</div>
+</sc-if>
+<div class="field"><label for="a-svc">Treatment</label>
+<dc-import name="Select" uid="a-svc" label="Treatment" placeholder="Choose a treatment" options="{{svcSel}}" value="{{dr.svc}}" invalid="{{dr.errSvc}}" on-change="{{dr.setSvc}}" hint-size="100%,52px"></dc-import>
+<sc-if value="{{dr.errSvc}}" hint-placeholder-val="{{ false }}"><span class="err">Choose the treatment</span></sc-if>
+<div class="dur-hint" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{dr.durHint}}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{dr.isB}}" hint-placeholder-val="{{ false }}">
+<div role="tabpanel" id="panel-b" aria-labelledby="tab-b">
+<h3 class="sec-t" id="b-type">Block type</h3>
+<div class="pills" role="group" aria-labelledby="b-type">
+<sc-for list="{{dr.btypes}}" as="p" hint-placeholder-count="5"><button type="button" class="pill" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+</div>
+</sc-if>
+
+<div class="field"><label for="d-op">Staff member</label>
+<dc-import name="Select" uid="d-op" label="Staff member" placeholder="Choose the staff member" options="{{staffSel}}" value="{{dr.op}}" invalid="{{dr.errOp}}" on-change="{{dr.setOp}}" hint-size="100%,52px"></dc-import>
+<sc-if value="{{dr.errOp}}" hint-placeholder-val="{{ false }}"><span class="err">{{dr.errOpMsg}}</span></sc-if>
+</div>
+
+<sc-if value="{{dr.isA}}" hint-placeholder-val="{{ true }}">
+<div class="field"><label for="a-note">Appointment note <span class="lbl-sub">· only for this appointment</span></label>
+<textarea id="a-note" class="textarea" placeholder="E.g. first time, bringing her own products…" value="{{dr.note}}" onInput="{{dr.setNote}}"></textarea>
+</div>
+</sc-if>
+
+</div>
+<div class="dr-ft">
+<sc-if value="{{dr.isEdit}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-danger-ghost" style="flex: none" onClick="{{dr.del}}">Delete</button></sc-if>
+<button type="button" class="btn btn-secondary" onClick="{{closeDr}}">Cancel</button>
+<button type="button" class="btn btn-primary" onClick="{{saveDr}}">{{dr.saveLbl}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{tourOn}}" hint-placeholder-val="{{ false }}">
+<div class="overlay tour-ov" style="z-index: 70">
+<div class="modal tour" role="dialog" aria-modal="true" aria-labelledby="tour-t" aria-describedby="tour-d">
+<div class="tour-top">
+<p class="t-over">Welcome tour · {{tour.n}} of {{tour.tot}}</p>
+<div class="tour-dots" role="progressbar" aria-label="Tour progress" aria-valuemin="1" aria-valuemax="{{tour.tot}}" aria-valuenow="{{tour.n}}"><sc-for list="{{tour.dots}}" as="d" hint-placeholder-count="5"><span class="{{d.cls}}"></span></sc-for></div>
+</div>
+<div class="tour-vis" aria-hidden="true">
+<sc-if value="{{tour.v1}}" hint-placeholder-val="{{ true }}">
+<div class="tv-row"><span class="chip chip-all" aria-pressed="true">All staff</span><span class="chip"><span class="av av-sm bg-c1">B</span>Bianca</span><span class="chip"><span class="av av-sm bg-c2">C</span>Chiara</span></div>
+<div class="tv-cal"><div class="appt c1 tv-appt"><span class="ah"><span class="ini bg-c1">B</span>09:00 – 10:00</span><span class="nm">Anna Galli</span><span class="tr">Deep cleansing facial</span></div><div class="appt c2 tv-appt"><span class="ah"><span class="ini bg-c2">C</span>10:30 – 11:30</span><span class="nm">Sara Bassi</span><span class="tr">Massage</span></div></div>
+</sc-if>
+<sc-if value="{{tour.v2}}" hint-placeholder-val="{{ false }}">
+<div class="tv-cal tv-slot"><div class="slot-ghost" style="position: static; height: 56px">+ 11:00</div></div>
+<div class="dur-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Deep cleansing facial · 1 h · ends at 12:00</div>
+</sc-if>
+<sc-if value="{{tour.v3}}" hint-placeholder-val="{{ false }}">
+<div class="cnote-box"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>Client note</b><span>Sensitive skin: avoid scented products</span></div>
+<div class="note-box"><b>Appointment note</b><span>First time at the salon</span></div>
+</sc-if>
+<sc-if value="{{tour.v4}}" hint-placeholder-val="{{ false }}">
+<div class="pay-row"><span class="tag tag-danger"><span class="dot"></span>Unpaid</span><div class="pay-acts"><span class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13"></path></svg>Use a voucher</span><span class="btn btn-secondary btn-sm">Mark as paid</span></div></div>
+<div class="vopt" aria-pressed="true"><span class="vopt-tx"><b>Deep cleansing facial · € 60</b><small>For Anna Galli · <span class="code">GB-6142</span></small><span class="tag tag-ok">Client and treatment</span></span></div>
+</sc-if>
+<sc-if value="{{tour.v5}}" hint-placeholder-val="{{ false }}">
+<div class="mini-kpis"><div><span class="t-over">Taken today</span><p class="num-md">€ 115</p></div><div><span class="t-over">This week</span><p class="num-md">€ 980</p></div></div>
+</sc-if>
+</div>
+<div class="tour-bd">
+<h2 id="tour-t" class="serif t-h2">{{tour.title}}</h2>
+<p id="tour-d" class="t-muted">{{tour.text}}</p>
+</div>
+<div class="modal-ft tour-ft">
+<sc-if value="{{tour.notLast}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{tour.skip}}">Skip the tour</button></sc-if>
+<span style="flex: 1"></span>
+<sc-if value="{{tour.canBack}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{tour.back}}">Back</button></sc-if>
+<button type="button" class="btn btn-primary" onClick="{{tour.next}}">{{tour.nextLbl}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{delOpen}}" hint-placeholder-val="{{ false }}">
+<div class="overlay" style="z-index: 60">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="del-t" aria-describedby="del-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="del-t" class="t-h3" style="padding-top: 10px">{{del.title}}</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{cancelDel}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="del-d" style="color: #4F4446">{{del.text}}</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{cancelDel}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmDel}}">{{del.cta}}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toastOn}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status" aria-live="polite">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+<span class="tmsg">{{toastMsg}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-sm" onClick="{{undo}}">Undo</button></sc-if>
+<button type="button" class="btn btn-sm" aria-label="Close message" onClick="{{closeToast}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: #fff"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"tourstep":{"editor":"enum","options":["","1","2","3","4","5"],"default":""},"demo":{"editor":"enum","options":["none","aggiungi","cliente","nuova","dettagli","elimina","mese"],"default":"none"},"$preview":{"width":1440,"height":1240}}'>
+const STAFF0 = [
+  { id: 'b', name: 'Bianca Neri', short: 'Bianca', ini: 'B', c: 'c1' },
+  { id: 'c', name: 'Chiara Ferri', short: 'Chiara', ini: 'C', c: 'c2' },
+  { id: 'm', name: 'Martina Sole', short: 'Martina', ini: 'M', c: 'c3' },
+  { id: 'n', name: 'Noemi Riva', short: 'Noemi', ini: 'N', c: 'c4' }
+];
+// Giorno 0 = lunedì 9 novembre 2026. Oggi = giovedì 12 novembre, ore 10:10.
+const TODAY = 3;
+const NOW = 10 * 60 + 10;
+const PPH = 72;
+const START = 9 * 60;
+const WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const WDS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MESI = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MESI3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const dOf = (off) => new Date(2026, 10, 9 + off);
+const offOf = (y, m, d) => Math.round((Date.UTC(y, m, d) - Date.UTC(2026, 10, 9)) / 864e5);
+const wdOf = (off) => ((off % 7) + 7) % 7;
+const longLbl = (off) => { const d = dOf(off); return WD[wdOf(off)] + ' ' + d.getDate() + ' ' + MESI[d.getMonth()] + ' ' + d.getFullYear(); };
+const shortLbl = (off) => { const d = dOf(off); return WD[wdOf(off)] + ' ' + d.getDate() + ' ' + MESI3[d.getMonth()]; };
+const pad = (n) => (n < 10 ? '0' : '') + n;
+const fmt = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const toMin = (s) => { const p = s.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+const fmtDur = (d) => { const h = Math.floor(d / 60), m = d % 60; return h ? h + ' h' + (m ? ' ' + m + ' min' : '') : m + ' min'; };
+const initials = (n) => n.split(' ').filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+// [giorno, inizio, fine, cliente, trattamento, operatrice]
+const APPTS = [
+  [0, '09:00', '10:00', 'Anna Galli', 'Deep cleansing facial', 'b'], [0, '09:00', '10:00', 'Sara Bassi', 'Relaxing massage', 'c'], [0, '09:30', '10:30', 'Elisa Monti', 'Deep cleansing facial', 'm'], [0, '10:00', '11:00', 'Laura Pini', 'Lymphatic drainage', 'n'], [0, '11:00', '12:30', 'Marta Rossetti', 'Body treatment', 'b'], [0, '14:00', '15:00', 'Giada Fumi', 'Skin consultation', 'c'], [0, '15:00', '16:00', 'Paola Riccio', 'Relaxing massage', 'm'], [0, '16:00', '17:00', 'Irma Basile', 'Lymphatic drainage', 'n'],
+  [1, '09:00', '10:00', 'Silvia Moro', 'Relaxing massage', 'c'], [1, '09:00', '10:00', 'Clara Doni', 'Lymphatic drainage', 'm'], [1, '10:30', '11:30', 'Vera Longhi', 'Deep cleansing facial', 'b'], [1, '11:00', '12:00', 'Rita Sala', 'Deep cleansing facial', 'n'], [1, '14:00', '15:00', 'Ada Pozzi', 'Body treatment', 'm'], [1, '16:00', '17:30', 'Nora Ghidi', 'Relaxing massage', 'c'],
+  [2, '09:00', '10:00', 'Alice Rota', 'Skin consultation', 'n'], [2, '09:30', '11:00', 'Bice Ferro', 'Lymphatic drainage', 'm'], [2, '10:30', '11:30', 'Elena Gori', 'Body treatment', 'b'], [2, '12:00', '13:00', 'Dora Vitali', 'Deep cleansing facial', 'm'], [2, '14:00', '15:00', 'Ines Carli', 'Relaxing massage', 'b'], [2, '15:00', '16:00', 'Lia Bruni', 'Relaxing massage', 'n'],
+  [3, '09:00', '10:00', 'Pia Marchi', 'Skin consultation', 'b'], [3, '11:00', '12:00', 'Olga Brera', 'Relaxing massage', 'c'], [3, '13:00', '14:00', 'Tea Ferrante', 'Deep cleansing facial', 'n'], [3, '14:00', '15:00', 'Gaia Orsi', 'Lymphatic drainage', 'c'], [3, '15:00', '16:00', 'Sofia Lodi', 'Lymphatic drainage', 'b'], [3, '17:00', '18:00', 'Rosa Bassani', 'Relaxing massage', 'n'],
+  [4, '09:00', '10:00', 'Carla Duse', 'Relaxing massage', 'c'], [4, '09:30', '10:30', 'Dafne Mori', 'Deep cleansing facial', 'n'], [4, '11:00', '12:00', 'Lisa Esposti', 'Body treatment', 'b'], [4, '12:00', '13:00', 'Ada Volpe', 'Skin consultation', 'm'], [4, '15:00', '16:00', 'Nadia Cerri', 'Relaxing massage', 'm'], [4, '16:00', '17:30', 'Livia Peri', 'Deep cleansing facial', 'c'], [4, '18:00', '19:00', 'Cora Landi', 'Deep cleansing facial', 'b'],
+  [5, '09:00', '10:00', 'Marta Zeni', 'Relaxing massage', 'b'], [5, '10:00', '11:00', 'Viola Arno', 'Relaxing massage', 'm'], [5, '10:00', '11:00', 'Arianna Pace', 'Skin consultation', 'n'], [5, '11:00', '12:00', 'Irene Vigo', 'Body treatment', 'c'], [5, '13:00', '14:00', 'Aurora Tosi', 'Lymphatic drainage', 'c'], [5, '15:00', '16:00', 'Bea Lanza', 'Lymphatic drainage', 'n']
+];
+// Note appuntamento: valgono solo per quel singolo appuntamento
+const NOTES = { 2: 'Brings the products she uses at home', 15: 'Swollen ankles: focus on the legs', 22: 'First time at the salon', 35: 'Ask how the home routine is going' };
+// Note cliente: restano sempre sulla scheda della cliente
+const CNOTES = {
+  'Anna Galli': 'Sensitive skin: avoid scented products',
+  'Silvia Moro': 'Latex allergy',
+  'Marta Rossetti': 'Prefers light pressure',
+  'Nora Ghidi': 'Usually arrives 10 minutes early',
+  'Carla Duse': 'Lower back discomfort',
+  'Pia Marchi': 'Nickel allergy',
+  'Gaia Orsi': 'Prefers quiet music'
+};
+const BTYPES = ['Break', 'Lunch', 'Meeting', 'Free time', 'Cleaning'];
+// Stesso elenco della pagina Trattamenti
+const SVCS0 = [
+  { name: 'Deep cleansing facial', dur: 60 }, { name: 'Anti-ageing facial', dur: 50 }, { name: 'Skin consultation', dur: 30 },
+  { name: 'Relaxing massage', dur: 60 }, { name: 'Lymphatic drainage', dur: 60 }, { name: 'Body treatment', dur: 90 },
+  { name: 'Body scrub', dur: 45 }
+];
+const TIMES = []; for (let m = START; m <= 19 * 60 + 30; m += 30) TIMES.push(fmt(m));
+const ENDS = []; for (let m = START + 30; m <= 20 * 60; m += 30) ENDS.push(fmt(m));
+// Stessi buoni della pagina Buoni regalo
+const VOUCHERS0 = [
+  { id: 'v1', code: 'GB-4821', svc: 'Anti-ageing facial', amount: 75, from: 'Anna Galli', to: 'Sara Bassi', created: offOf(2026, 9, 2), expires: offOf(2027, 3, 2), used: null },
+  { id: 'v2', code: 'GB-6142', svc: 'Deep cleansing facial', amount: 60, from: 'Paola Riccio', to: 'Tea Ferrante', created: offOf(2026, 10, 10), expires: offOf(2027, 4, 10), used: null },
+  { id: 'v3', code: 'GB-3307', svc: 'Relaxing massage', amount: 55, from: 'Marta Rossetti', to: 'Silvia Moro', created: offOf(2026, 8, 15), expires: offOf(2027, 2, 15), used: offOf(2026, 9, 20) },
+  { id: 'v4', code: 'GB-5590', svc: 'Body scrub', amount: 40, from: 'Vera Longhi', to: 'Lia Bruni', created: offOf(2026, 7, 10), expires: offOf(2026, 10, 10), used: null },
+  { id: 'v5', code: 'GB-7215', svc: 'Body treatment', amount: 80, from: 'Rosa Bassani', to: 'Gaia Orsi', created: offOf(2026, 9, 28), expires: null, used: null },
+  { id: 'v6', code: 'GB-2954', svc: 'Lymphatic drainage', amount: 60, from: 'Clara Doni', to: 'Nora Ghidi', created: offOf(2026, 5, 1), expires: offOf(2026, 11, 1), used: null }
+];
+// Stessa rubrica della pagina Clienti
+const CL_NAMES = ['Anna Galli', 'Sara Bassi', 'Elisa Monti', 'Laura Pini', 'Marta Rossetti', 'Giada Fumi', 'Paola Riccio', 'Irma Basile', 'Silvia Moro', 'Clara Doni', 'Vera Longhi', 'Rita Sala', 'Ada Pozzi', 'Nora Ghidi', 'Alice Rota', 'Bice Ferro', 'Elena Gori', 'Dora Vitali', 'Ines Carli', 'Lia Bruni', 'Pia Marchi', 'Olga Brera', 'Tea Ferrante', 'Gaia Orsi', 'Sofia Lodi', 'Rosa Bassani', 'Carla Duse', 'Dafne Mori', 'Lisa Esposti', 'Ada Volpe', 'Nadia Cerri', 'Livia Peri', 'Cora Landi', 'Marta Zeni', 'Viola Arno', 'Arianna Pace', 'Irene Vigo', 'Aurora Tosi', 'Bea Lanza'];
+const CLIENTS0 = CL_NAMES.map((n, i) => {
+  const p = n.split(' ');
+  return {
+    id: 'c' + (i + 1), nome: p[0], cognome: p.slice(1).join(' '),
+    tel: '+39 300 000 ' + String(101 + i).padStart(4, '0'),
+    email: i % 7 === 3 ? '' : (p[0] + '.' + p.slice(1).join('')).toLowerCase() + '@mail.demo',
+    note: CNOTES[n] || ''
+  };
+});
+const isPaid = (day, e) => day < TODAY || (day === TODAY && e <= NOW);
+const mk = (id, day, a, client, note) => ({ id, kind: 'appt', day, s: toMin(a[1]), e: toMin(a[2]), client, tr: a[4], op: a[5], note: note || '', paid: isPaid(day, toMin(a[2])) });
+const ITEMS0 = APPTS.map((a, i) => mk('a' + i, a[0], a, a[3], NOTES[i]));
+// Settimane vicine: dati di esempio generati dalla stessa agenda
+// Da sabato 1 agosto a giovedì 31 dicembre 2026 (esclusi i festivi nazionali)
+const FIRST = offOf(2026, 7, 1), LAST = offOf(2026, 11, 31);
+const HOLIDAYS = [offOf(2026, 7, 15), offOf(2026, 11, 8), offOf(2026, 11, 25), offOf(2026, 11, 26)];
+for (let k = -15; k <= 7; k++) {
+  if (k === 0) continue;
+  APPTS.forEach((a, i) => {
+    const day = a[0] + 7 * k;
+    if (day < FIRST || day > LAST || HOLIDAYS.includes(day)) return;
+    if ((((i * 7 + k * 3) % 5) + 5) % 5 === 0) return;
+    const ci = (((CL_NAMES.indexOf(a[3]) + 5 * k) % 39) + 39) % 39;
+    ITEMS0.push(mk('w' + k + '-' + i, day, a, CL_NAMES[ci], ''));
+  });
+}
+const DEMO = {
+  aggiungi: { mode: 'new', tab: 'a', dOff: TODAY, start: '15:30', end: '16:00', dur: 60, op: '', clientId: null, cq: '', cOpen: false, nc: null, cnote: '', svc: '', note: '', btype: 'Break', picker: false, err: {} },
+  cliente: { mode: 'new', tab: 'a', dOff: TODAY, start: '10:30', end: '11:00', dur: 30, op: 'n', clientId: null, cq: 'ar', cOpen: true, nc: null, cnote: '', svc: 'Skin consultation', note: '', btype: 'Break', picker: false, err: {} },
+  nuova: { mode: 'new', tab: 'a', dOff: TODAY, start: '10:30', end: '11:00', dur: 30, op: 'n', clientId: null, cq: '', cOpen: false, nc: { nome: 'Giulia', cognome: 'Mancini', tel: '+39 300 000 0199', email: '' }, cnote: '', svc: 'Skin consultation', note: '', btype: 'Break', picker: false, err: {} }
+};
+function layout(list) {
+  const sorted = list.slice().sort((a, b) => a.s - b.s || a.e - b.e);
+  const clusters = [];
+  let cur = [], curEnd = -1;
+  sorted.forEach((a) => {
+    if (cur.length && a.s >= curEnd) { clusters.push(cur); cur = []; curEnd = -1; }
+    cur.push(a); curEnd = Math.max(curEnd, a.e);
+  });
+  if (cur.length) clusters.push(cur);
+  const out = [];
+  clusters.forEach((cl) => {
+    const lanes = [];
+    const placed = cl.map((a) => {
+      let i = lanes.findIndex((end) => end <= a.s);
+      if (i < 0) { i = lanes.length; lanes.push(0); }
+      lanes[i] = a.e;
+      return { ...a, lane: i };
+    });
+    placed.forEach((a) => out.push({ ...a, n: lanes.length }));
+  });
+  return out;
+}
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient', 'products', 'vouchers'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  // Tour di benvenuto: solo da guardare, si può saltare
+  tourVals(items) {
+    const T = this.state.tour || {};
+    const SL = [
+      ['The calendar is your diary', 'One column per day. Each staff member has her own colour: use the filters at the top to see only her appointments.'],
+      ['An appointment in one click', 'Click a free time slot or “New appointment”. Choose the client, or create her there if she is new. The treatment sets the length for you.'],
+      ['Clients and notes', 'The client note stays on her profile and shows in all her appointments, for example an allergy. The appointment note is only for that visit.'],
+      ['Payments and gift vouchers', 'Open an appointment to mark it as paid or pay with a voucher: only valid vouchers are suggested, no need to remember the code.'],
+      ['Takings at a glance', 'The Dashboard shows what you took today, this week and this month, across treatments, creams sold and vouchers.']
+    ];
+    const tot = SL.length;
+    const n = Math.min(tot, Math.max(1, T.n || Number(this.props.tourstep) || 1));
+    const appts = items.filter((a) => a.kind !== 'block');
+    const on = !T.closed && (appts.length === 0 || !!this.props.tourstep);
+    const go = (k) => this.setState({ tour: { ...T, n: k } });
+    const close = () => this.setState({ tour: { ...T, closed: true } });
+    const v = {}; for (let i = 1; i <= tot; i++) v['v' + i] = n === i;
+    return {
+      tourOn: on,
+      tour: {
+        ...v, n, tot, title: SL[n - 1][0], text: SL[n - 1][1],
+        dots: SL.map((x, i) => ({ cls: 'tour-dot' + (i + 1 <= n ? ' is-on' : '') })),
+        notLast: n < tot, canBack: n > 1,
+        nextLbl: n < tot ? 'Next' : 'Start using it',
+        next: () => (n < tot ? go(n + 1) : close()),
+        back: () => go(n - 1),
+        skip: close
+      }
+    };
+  }
+  items() { return this.state.items ?? ITEMS0; }
+  vouchers() { return this.state.vouchers ?? VOUCHERS0; }
+  voucherPick(oi) {
+    const vs = this.vouchers();
+    const valid = vs.filter((b) => (b.used === null || b.used === undefined) && (b.expires === null || b.expires === undefined || b.expires >= TODAY));
+    const score = (b) => (b.to === oi.client ? 2 : 0) + (b.svc === oi.tr ? 1 : 0);
+    const list = valid.slice().sort((a, b) => score(b) - score(a) || a.code.localeCompare(b.code));
+    const vOpen = this.state.vFor === oi.id;
+    const pick = list.find((b) => b.id === this.state.vPick) || null;
+    return {
+      canVoucher: !oi.paid && valid.length > 0,
+      vOpen, vOpenS: vOpen ? 'true' : 'false',
+      vCount: valid.length,
+      toggleV: () => {
+        // Preseleziona il buono della stessa cliente e dello stesso trattamento, se c'è
+        const best = list[0] && score(list[0]) > 0 ? list[0].id : null;
+        this.setState({ vFor: vOpen ? null : oi.id, vPick: best });
+      },
+      cancelV: () => this.setState({ vFor: null, vPick: null }),
+      vList: list.map((b) => {
+        const sc = score(b);
+        return {
+          ...b, amount: String(b.amount || 0).replace('.', ','),
+          pressed: pick && pick.id === b.id ? 'true' : 'false',
+          match: sc > 0,
+          matchLbl: sc === 3 ? 'Client and treatment' : (sc === 2 ? 'Same client' : 'Same treatment'),
+          pick: () => this.setState({ vPick: b.id })
+        };
+      }),
+      hasPick: !!pick,
+      vWarn: !!pick && pick.svc !== oi.tr,
+      payV: () => {
+        if (!pick) return;
+        const all = this.items();
+        this.setState({
+          items: all.map((x) => (x.id === oi.id ? { ...x, paid: true, voucher: pick.code } : x)),
+          vouchers: vs.map((b) => (b.id === pick.id ? { ...b, used: TODAY, usedFor: oi.tr + ' · ' + oi.client } : b)),
+          vFor: null, vPick: null
+        });
+        this.toast('Paid with voucher ' + pick.code + ' · ' + oi.client, all, vs);
+      }
+    };
+  }
+  curClients() { return this.state.clients ?? CLIENTS0; }
+  curDr() { return this.state.dr !== undefined ? this.state.dr : (DEMO[this.props.demo] || null); }
+  setDr(p) { this.setState({ dr: { ...this.curDr(), ...p } }); }
+  findClient(name) { return this.curClients().find((x) => x.nome + ' ' + x.cognome === name) || null; }
+  toast(msg, undoItems, undoVouchers) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({ toast: { msg, undo: undoItems || null, undoV: undoVouchers || null } });
+    this._t = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  slot(e) {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const k = (r.height / el.offsetHeight) || 1;
+    const y = (e.clientY - r.top) / k;
+    const m = START + Math.floor(y / (PPH / 2)) * 30;
+    return Math.max(START, Math.min(m, 19 * 60 + 30));
+  }
+  openNew(off, m) {
+    const sel = this.state.sel || [];
+    this.setState({ open: null, hover: null, dr: {
+      mode: 'new', tab: 'a', dOff: off, start: fmt(m), end: fmt(Math.min(m + 30, 20 * 60)), dur: 60,
+      op: sel.length === 1 ? sel[0] : '', clientId: null, cq: '', cOpen: false, nc: null, cnote: '',
+      svc: '', note: '', btype: 'Break', picker: false, err: {}
+    } });
+  }
+  openFrom(it, mode) {
+    const blk = it.kind === 'block';
+    const c = blk ? null : this.findClient(it.client);
+    this.setState({ open: null, hover: null, dr: {
+      mode, editId: mode === 'edit' ? it.id : null, tab: blk ? 'b' : 'a', dOff: it.day,
+      start: fmt(it.s), end: fmt(it.e), dur: it.e - it.s, op: it.op,
+      clientId: c ? c.id : null, cq: '', cOpen: false, nc: null, cnote: c ? (c.note || '') : '',
+      svc: blk ? '' : it.tr, note: it.note || '', btype: blk ? it.client : 'Break', picker: false, err: {}
+    } });
+  }
+  askDelete(id) { this.setState({ open: null, dr: null, delId: id }); }
+  save() {
+    const d = this.curDr();
+    const items = this.items();
+    const clients = this.curClients();
+    let clientName = '';
+    let newClients = clients;
+    const err = {};
+    const s = toMin(d.start);
+    const e = d.tab === 'a' ? s + (d.dur || 60) : toMin(d.end);
+    if (!d.op) err.op = 1;
+    if (d.tab === 'a') {
+      if (d.nc) {
+        const n = { nome: d.nc.nome.trim(), cognome: d.nc.cognome.trim(), tel: d.nc.tel.trim(), email: d.nc.email.trim() };
+        if (!n.nome || !n.cognome) err.nc = 1;
+        else if (!n.tel && !n.email) err.nc = 2;
+        else { clientName = n.nome + ' ' + n.cognome; newClients = [...clients, { id: 'c' + Date.now(), ...n, note: (d.cnote || '').trim() }]; }
+      } else if (d.clientId) {
+        const c = clients.find((x) => x.id === d.clientId);
+        clientName = c ? c.nome + ' ' + c.cognome : '';
+        newClients = clients.map((x) => (x.id === d.clientId ? { ...x, note: (d.cnote || '').trim() } : x));
+      }
+      if (!clientName && !err.nc) err.client = 1;
+      if (!d.svc) err.svc = 1;
+    }
+    if (d.tab === 'b' && e <= s) err.end = 1;
+    if (Object.keys(err).length) { this.setDr({ err }); return; }
+    const prev = d.editId ? items.find((x) => x.id === d.editId) : null;
+    const it = {
+      id: d.editId || ('n' + Date.now()), kind: d.tab === 'a' ? 'appt' : 'block', day: d.dOff,
+      s, e: Math.min(e, 20 * 60), op: d.op,
+      client: d.tab === 'a' ? clientName : d.btype,
+      tr: d.tab === 'a' ? d.svc : 'Time blocked',
+      note: d.tab === 'a' ? (d.note || '') : '',
+      paid: prev ? !!prev.paid : false
+    };
+    const next = d.editId ? items.map((x) => (x.id === d.editId ? it : x)) : [...items, it];
+    const view = this.state.view || 'settimana';
+    const cur = this.state.cur ?? TODAY;
+    const ws = cur - wdOf(cur);
+    const visibleNow = view === 'giorno' ? it.day === cur : (view === 'settimana' ? it.day >= ws && it.day <= ws + 5 : true);
+    this.setState({ items: next, clients: newClients, dr: null, cur: visibleNow ? cur : it.day, pday: it.day });
+    const when = shortLbl(it.day) + ', ' + fmt(it.s);
+    this.toast(d.editId ? 'Changes saved · ' + when : (it.kind === 'block' ? 'Time blocked · ' + when : 'Appointment saved · ' + when), d.editId ? null : null);
+  }
+  renderVals() {
+    const items = this.items();
+    const ALLSTAFF = this.state.members
+      ? this.state.members.map((m) => ({ id: m.id, name: (m.nome + ' ' + (m.cognome || '')).trim(), short: m.nome, ini: (m.nome || '?').charAt(0).toUpperCase(), c: m.c, active: m.active !== false }))
+      : STAFF0.map((s) => ({ ...s, active: true }));
+    const STAFF = ALLSTAFF.filter((s) => s.active);
+    const SVCS = this.state.svcs ? this.state.svcs.map((s) => ({ name: s.name, dur: s.dur })) : SVCS0;
+    const UNKNOWN = { id: '?', name: 'Removed staff member', short: '—', ini: '?', c: 'c6' };
+    const sel = this.state.sel || [];
+    const demo = this.props.demo || 'none';
+    const view = this.state.view || (demo === 'mese' ? 'mese' : 'settimana');
+    const cur = this.state.cur ?? TODAY;
+    const ws = cur - wdOf(cur);
+    const open = this.state.open !== undefined ? this.state.open : (demo === 'dettagli' ? 'a20' : null);
+    const d = this.curDr();
+    const hv = this.state.hover || null;
+    const dragId = this.state.dragId || null;
+    const on = (id) => sel.length === 0 || sel.includes(id);
+    const allClients = this.curClients();
+    const cnoteOf = (name) => { const c = allClients.find((x) => x.nome + ' ' + x.cognome === name); return c && c.note ? c.note : ''; };
+
+    const view1 = (it) => {
+      const st = ALLSTAFF.find((x) => x.id === it.op) || UNKNOWN;
+      const blk = it.kind === 'block';
+      const cn = blk ? '' : cnoteOf(it.client);
+      return {
+        ...it, staff: st, from: fmt(it.s), to: fmt(it.e), hasNote: !!it.note, cnote: cn, hasCNote: !!cn,
+        iniCls: 'ini bg-' + st.c,
+        agCls: 'ag-item ' + (blk ? '' : st.c),
+        dotCls: 'm-dot ' + (blk ? 'blk' : 'bg-' + st.c),
+        cls: 'appt ' + (blk ? 'blk' : st.c) + (open === it.id ? ' is-open' : '') + (dragId === it.id ? ' is-dragging' : ''),
+        expanded: open === it.id ? 'true' : 'false',
+        label: shortLbl(it.day) + ', ' + fmt(it.s) + '–' + fmt(it.e) + ', ' + it.client + ', ' + it.tr + ', ' + st.name + (cn ? ', client note: ' + cn : '') + (it.note ? ', with appointment note' : '') + '. Open details',
+        click: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ open: it.id, noteDraft: '', hover: null }); },
+        mClick: () => this.setState({ view: 'giorno', cur: it.day, pday: it.day, open: it.id, noteDraft: '' }),
+        dragStart: (e) => { try { e.dataTransfer.setData('text/plain', it.id); e.dataTransfer.effectAllowed = 'move'; } catch (x) {} this.setState({ dragId: it.id, open: null }); },
+        dragEnd: () => this.setState({ dragId: null, hover: null })
+      };
+    };
+    const visible = items.filter((a) => on(a.op)).map(view1);
+
+    // Colonne: giorno o settimana (lun-sab)
+    const offs = view === 'giorno' ? [cur] : [0, 1, 2, 3, 4, 5].map((i) => ws + i);
+    const n = offs.length;
+    const dragItem = dragId ? items.find((x) => x.id === dragId) : null;
+    const cols = offs.map((off, ci) => {
+      let ghost = { show: false };
+      if (d && d.mode !== 'edit' && d.dOff === off) {
+        const s = toMin(d.start);
+        const len = d.tab === 'a' ? (d.dur || 60) : Math.max(30, toMin(d.end) - s);
+        ghost = { show: true, cls: 'slot-ghost is-picked', top: ((s - START) / 60) * PPH + 1, h: (len / 60) * PPH - 3, label: 'New · ' + d.start };
+      } else if (hv && hv.off === off && !d && !open) {
+        const len = hv.drag && dragItem ? dragItem.e - dragItem.s : 30;
+        ghost = { show: true, cls: 'slot-ghost' + (hv.drag ? ' is-drop' : ''), top: ((hv.m - START) / 60) * PPH + 1, h: (len / 60) * PPH - 3, label: (hv.drag ? 'Move here · ' : '+ ') + fmt(hv.m) };
+      }
+      const dt = dOf(off);
+      return {
+        off, dn: view === 'giorno' ? WD[wdOf(off)] : WDS[wdOf(off)], dnum: dt.getDate(),
+        full: longLbl(off),
+        isToday: off === TODAY,
+        hdCls: 'dh' + (off === TODAY ? ' is-today' : '') + (ci === n - 1 ? ' has-next' : ''),
+        isLast: ci === n - 1,
+        cur: off === TODAY ? 'date' : undefined,
+        colCls: 'col' + (off === TODAY ? ' is-today' : ''),
+        ghost,
+        click: (e) => {
+          if (e.target !== e.currentTarget) return;
+          if (this.state.open) { this.setState({ open: null }); return; }
+          this.openNew(off, this.slot(e));
+        },
+        move: (e) => {
+          if (this.state.dr || this.state.open || this.state.dragId) return;
+          if (e.target !== e.currentTarget) { if (this.state.hover) this.setState({ hover: null }); return; }
+          const m = this.slot(e);
+          const h = this.state.hover;
+          if (!h || h.off !== off || h.m !== m) this.setState({ hover: { off, m } });
+        },
+        leave: () => { if (this.state.hover) this.setState({ hover: null }); },
+        dragOver: (e) => {
+          if (!this.state.dragId) return;
+          e.preventDefault();
+          const m = this.slot(e);
+          const h = this.state.hover;
+          if (!h || h.off !== off || h.m !== m || !h.drag) this.setState({ hover: { off, m, drag: true } });
+        },
+        drop: (e) => {
+          e.preventDefault();
+          const id = this.state.dragId;
+          if (!id) return;
+          const m = this.slot(e);
+          const all = this.items();
+          const it = all.find((x) => x.id === id);
+          if (!it) return;
+          const len = it.e - it.s;
+          const s = Math.min(m, 20 * 60 - len);
+          this.setState({ items: all.map((x) => (x.id === id ? { ...x, day: off, s, e: s + len } : x)), dragId: null, hover: null });
+          this.toast((it.kind === 'block' ? 'Block moved to ' : 'Appointment moved to ') + shortLbl(off) + ', ' + fmt(s), all);
+        },
+        list: layout(visible.filter((a) => a.day === off)).map((a) => ({
+          ...a,
+          top: ((a.s - START) / 60) * PPH + 1,
+          h: ((a.e - a.s) / 60) * PPH - 3,
+          left: (a.lane / a.n) * 100,
+          w: 100 / a.n
+        }))
+      };
+    });
+    const hours = [];
+    for (let h = 9; h < 20; h++) hours.push({ label: pad(h) + ':00', top: (h - 9) * PPH + 4 });
+
+    // Vista mese (lun-sab)
+    const cd = dOf(cur);
+    const my = cd.getFullYear(), mm = cd.getMonth();
+    const firstOff = offOf(my, mm, 1);
+    const lastOff = offOf(my, mm + 1, 0);
+    const gridStart = firstOff - wdOf(firstOff);
+    const rows = Math.ceil((lastOff - gridStart + 1) / 7);
+    const mcells = [];
+    const pd0 = this.state.pday ?? TODAY;
+    const mPday = pd0 >= firstOff && pd0 <= lastOff ? pd0 : (TODAY >= firstOff && TODAY <= lastOff ? TODAY : firstOff);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < 6; c++) {
+        const off = gridStart + r * 7 + c;
+        const dt = dOf(off);
+        const its = visible.filter((a) => a.day === off).sort((a, b) => a.s - b.s);
+        mcells.push({
+          n: dt.getDate(),
+          cls: 'm-cell' + (dt.getMonth() !== mm ? ' out' : '') + (off === TODAY ? ' is-today' : ''),
+          aria: 'Open ' + longLbl(off) + ', ' + its.length + ' appointments',
+          items: its.slice(0, 3),
+          more: its.length > 3, moreN: its.length - 3,
+          open: () => this.setState({ view: 'giorno', cur: off, pday: off }),
+          out: dt.getMonth() !== mm,
+          pmCls: 'pm-cell' + (dt.getMonth() !== mm ? ' out' : '') + (off === TODAY ? ' is-today' : ''),
+          pmSel: off === mPday ? 'true' : 'false',
+          pmAria: longLbl(off) + ', ' + (its.length === 1 ? '1 appointment' : its.length + ' appointments'),
+          dots: its.slice(0, 4).map((a) => (a.kind === 'block' ? 'bg-neutral' : 'bg-' + a.staff.c)),
+          pick: () => this.setState({ pday: off, cur: off, open: null })
+        });
+      }
+    }
+
+    // Etichette e navigazione
+    let rangeLbl, prevLbl, nextLbl;
+    if (view === 'giorno') { rangeLbl = cap(longLbl(cur)); prevLbl = 'Previous day'; nextLbl = 'Next day'; }
+    else if (view === 'mese') { rangeLbl = cap(MESI[mm]) + ' ' + my; prevLbl = 'Previous month'; nextLbl = 'Next month'; }
+    else {
+      const a = dOf(ws), b = dOf(ws + 5);
+      rangeLbl = a.getMonth() === b.getMonth()
+        ? a.getDate() + ' – ' + b.getDate() + ' ' + MESI[a.getMonth()] + ' ' + b.getFullYear()
+        : a.getDate() + ' ' + MESI3[a.getMonth()] + ' – ' + b.getDate() + ' ' + MESI3[b.getMonth()] + ' ' + b.getFullYear();
+      prevLbl = 'Previous week'; nextLbl = 'Next week';
+    }
+    const step = (dir) => {
+      let next = cur;
+      if (view === 'giorno') { next = cur + dir; if (wdOf(next) === 6) next += dir; }
+      else if (view === 'mese') next = offOf(my, mm + dir, 1);
+      else next = cur + 7 * dir;
+      const nws = next - wdOf(next);
+      this.setState({ cur: next, open: null, pday: view === 'giorno' ? next : (TODAY >= nws && TODAY <= nws + 5 ? TODAY : nws) });
+    };
+
+    // Agenda telefono
+    const pday0 = this.state.pday ?? TODAY;
+    const pday = pday0 >= ws && pday0 <= ws + 5 ? pday0 : (TODAY >= ws && TODAY <= ws + 5 ? TODAY : ws);
+    const agenda = visible.filter((a) => a.day === pday).sort((a, b) => a.s - b.s);
+
+    // Dettagli appuntamento
+    let pop = {};
+    const oi = open ? items.find((x) => x.id === open) : null;
+    const ci = oi ? offs.indexOf(oi.day) : -1;
+    if (oi) {
+      const v = view1(oi);
+      const blk = oi.kind === 'block';
+      const left = n === 1 ? 'calc(50% + 40px)'
+        : (ci < n / 2 ? 'calc(64px + (100% - 64px) * ' + ((ci + 1) / n) + ' + 8px)' : 'calc(64px + (100% - 64px) * ' + (ci / n) + ' - 368px)');
+      pop = {
+        title: blk ? oi.client : oi.tr,
+        when: shortLbl(oi.day) + ' · ' + v.from + ' – ' + v.to,
+        isAppt: !blk,
+        pay: oi.paid ? (oi.voucher ? 'Paid with voucher ' + oi.voucher : 'Paid') : 'Unpaid',
+        payCls: 'tag ' + (oi.paid ? 'tag-ok' : 'tag-danger'),
+        payBtn: oi.paid ? 'Mark as unpaid' : 'Mark as paid',
+        togglePay: () => {
+          const all = this.items();
+          const vs = this.vouchers();
+          const p = { items: all.map((x) => (x.id === oi.id ? { ...x, paid: !x.paid, voucher: null } : x)), vFor: null };
+          // Se era pagato con un buono, il buono torna valido
+          if (oi.paid && oi.voucher) p.vouchers = vs.map((b) => (b.code === oi.voucher ? { ...b, used: null, usedFor: null } : b));
+          this.setState(p);
+          this.toast(oi.paid ? (oi.voucher ? 'Voucher ' + oi.voucher + ' valid again · ' + oi.client : 'Marked as unpaid · ' + oi.client) : 'Marked as paid · ' + oi.client, all, oi.voucher ? vs : null);
+        },
+        ...this.voucherPick(oi),
+        opAv: 'av av-sm bg-' + v.staff.c, opIni: v.staff.ini, opName: v.staff.name,
+        clIni: initials(oi.client), client: oi.client,
+        openScheda: () => { const c = this.findClient(oi.client); if (c) this.setState({ selClient: c.id }); },
+        hasCNote: v.hasCNote, cnote: v.cnote,
+        hasNote: !!oi.note, noNote: !oi.note, note: oi.note,
+        noteTitle: blk ? 'Note on the block' : 'Appointment note',
+        notePh: blk ? 'Add a note…' : 'Add a note for this appointment…',
+        delLbl: blk ? 'Delete block' : 'Delete appointment',
+        del: () => this.askDelete(oi.id),
+        top: this.state.vFor === oi.id ? 0 : Math.max(0, Math.min(((oi.s - START) / 60) * PPH, 792 - 480)),
+        left,
+        dup: () => this.openFrom(oi, 'dup'),
+        edit: () => this.openFrom(oi, 'edit')
+      };
+    }
+
+    // Conferma eliminazione
+    const delId0 = this.state.delId !== undefined ? this.state.delId : (demo === 'elimina' ? 'a21' : null);
+    const delIt = delId0 ? items.find((x) => x.id === delId0) : null;
+    const del = delIt ? (delIt.kind === 'block'
+      ? { title: 'Delete this block?', text: delIt.client + ' · ' + shortLbl(delIt.day) + ', ' + fmt(delIt.s) + ' – ' + fmt(delIt.e) + '. The time slot becomes free again.', cta: 'Delete block' }
+      : { title: 'Delete the appointment?', text: delIt.client + ' · ' + delIt.tr + ' · ' + shortLbl(delIt.day) + ', ' + fmt(delIt.s) + '. The time slot becomes free in the calendar.', cta: 'Delete appointment' }) : {};
+
+    // Pannello aggiungi / modifica
+    let drv = {};
+    if (d) {
+      const clients = allClients;
+      const cq = (d.cq || '').trim().toLowerCase();
+      const cqd = cq.replace(/\s/g, '');
+      const cMatches = clients.filter((c) => !cq || (c.nome + ' ' + c.cognome).toLowerCase().includes(cq) || (c.cognome + ' ' + c.nome).toLowerCase().includes(cq) || (/\d/.test(cqd) && c.tel.replace(/\s/g, '').includes(cqd)))
+        .slice(0, 6)
+        .map((c) => ({ ...c, full: c.nome + ' ' + c.cognome, ini: initials(c.nome + ' ' + c.cognome), pick: () => this.setDr({ clientId: c.id, cOpen: false, cq: '', cnote: c.note || '', err: { ...d.err, client: 0 } }) }));
+      const pcObj = clients.find((c) => c.id === d.clientId);
+      const nc = d.nc || { nome: '', cognome: '', tel: '', email: '' };
+      const setNc = (k) => (e) => this.setDr({ nc: { ...nc, [k]: e.target.value } });
+      const dd = dOf(d.dOff);
+      const pmY = d.pmY ?? dd.getFullYear();
+      const pmM = d.pmM ?? dd.getMonth();
+      const pFirst = offOf(pmY, pmM, 1);
+      const pStart = pFirst - wdOf(pFirst);
+      const cells = [];
+      for (let i = 0; i < 42; i++) {
+        const off = pStart + i;
+        const dt = dOf(off);
+        const out = dt.getMonth() !== ((pmM % 12) + 12) % 12;
+        cells.push({
+          n: dt.getDate(), out, aria: longLbl(off),
+          cls: 'dp-day' + (out ? ' out' : '') + (off >= ws && off <= ws + 5 ? ' in-week' : '') + (off === TODAY ? ' is-today' : ''),
+          pressed: off === d.dOff ? 'true' : 'false',
+          pick: () => this.setDr({ dOff: off, picker: false })
+        });
+      }
+      const pmDate = new Date(pmY, pmM, 1);
+      drv = {
+        ...d,
+        title: d.mode === 'edit' ? 'Edit' : (d.mode === 'dup' ? 'Duplicate appointment' : 'Add to calendar'),
+        isA: d.tab === 'a', isB: d.tab === 'b', isEdit: d.mode === 'edit',
+        selA: d.tab === 'a' ? 'true' : 'false', selB: d.tab === 'b' ? 'true' : 'false',
+        toA: () => this.setDr({ tab: 'a', err: {} }),
+        toB: () => this.setDr({ tab: 'b', err: {} }),
+        whenCls: d.tab === 'b' ? 'row3' : 'row2',
+        startLbl: d.tab === 'b' ? 'Start' : 'Start time',
+        dateTxt: pad(dd.getDate()) + '/' + pad(dd.getMonth() + 1) + '/' + dd.getFullYear(),
+        dateAria: 'Date: ' + longLbl(d.dOff) + '. Change date',
+        pickerExp: d.picker ? 'true' : 'false',
+        togglePicker: () => this.setDr({ picker: !d.picker, pmY: dd.getFullYear(), pmM: dd.getMonth() }),
+        pmLbl: cap(MESI[pmDate.getMonth()]) + ' ' + pmDate.getFullYear(),
+        pmPrev: () => { const x = new Date(pmY, pmM - 1, 1); this.setDr({ pmY: x.getFullYear(), pmM: x.getMonth() }); },
+        pmNext: () => { const x = new Date(pmY, pmM + 1, 1); this.setDr({ pmY: x.getFullYear(), pmM: x.getMonth() }); },
+        cells,
+        goToday: () => this.setDr({ dOff: TODAY, picker: false }),
+        setStart: (e) => this.setDr({ start: e.target.value }),
+        setEnd: (e) => this.setDr({ end: e.target.value }),
+        setOp: (e) => this.setDr({ op: e.target.value, err: { ...d.err, op: 0 } }),
+        setCq: (e) => this.setDr({ cq: e.target.value, cOpen: true }),
+        cFocus: () => { const c0 = this.curDr(); if (c0 && !c0.cOpen) this.setDr({ cOpen: true }); },
+        cPicked: !!d.clientId && !d.nc,
+        cSearch: !d.clientId && !d.nc,
+        cNewMode: !!d.nc,
+        cOpen: !!d.cOpen && !d.clientId && !d.nc,
+        cExp: d.cOpen ? 'true' : 'false',
+        cMatches,
+        cNone: cMatches.length === 0,
+        cNewLbl: (d.cq || '').trim() ? 'Add “' + d.cq.trim() + '” as a new client' : 'Add new client',
+        cNew: () => { const parts = (d.cq || '').trim().split(/\s+/).filter(Boolean); this.setDr({ nc: { nome: parts[0] || '', cognome: parts.slice(1).join(' '), tel: '', email: '' }, cnote: '', cOpen: false, err: { ...d.err, client: 0 } }); },
+        cChange: () => this.setDr({ clientId: null, cq: '', cOpen: true, cnote: '' }),
+        cCancelNew: () => this.setDr({ nc: null, cOpen: true }),
+        pc: pcObj ? { ini: initials(pcObj.nome + ' ' + pcObj.cognome), name: pcObj.nome + ' ' + pcObj.cognome, contact: pcObj.tel + (pcObj.email ? ' · ' + pcObj.email : '') } : {},
+        showCNote: !!d.clientId || !!d.nc,
+        cnote: d.cnote || '',
+        setCnote: (e) => this.setDr({ cnote: e.target.value }),
+        cnoteCls: 'textarea' + (d.cnote ? ' is-cnote' : ''),
+        nc,
+        setNcNome: setNc('nome'), setNcCognome: setNc('cognome'), setNcTel: setNc('tel'), setNcEmail: setNc('email'),
+        errNc: !!d.err.nc,
+        errNcMsg: d.err.nc === 2 ? 'Enter at least the mobile or the email' : 'Write the new client’s first and last name',
+        ncNomeCls: 'input' + (d.err.nc === 1 && !nc.nome.trim() ? ' is-error' : ''),
+        ncCognomeCls: 'input' + (d.err.nc === 1 && !nc.cognome.trim() ? ' is-error' : ''),
+        ncContactCls: 'input' + (d.err.nc === 2 ? ' is-error' : ''),
+        setSvc: (e) => { const s = SVCS.find((x) => x.name === e.target.value); this.setDr({ svc: e.target.value, dur: s ? s.dur : (d.dur || 60), err: { ...d.err, svc: 0 } }); },
+        errSvc: !!d.err.svc,
+        durHint: d.svc ? 'Length ' + fmtDur(d.dur) + ' · ends at ' + fmt(toMin(d.start) + d.dur) : 'Choose a treatment: the length is set automatically',
+        setNote: (e) => this.setDr({ note: e.target.value }),
+        errOp: !!d.err.op, errClient: !!d.err.client, errEnd: !!d.err.end,
+        errOpMsg: d.tab === 'b' ? 'Choose who to block the time for' : 'Choose who does the treatment',
+        errClientS: d.err.client ? 'true' : 'false',
+        clientCls: 'input' + (d.err.client ? ' is-error' : ''),
+        btypes: BTYPES.map((b) => ({ label: b, pressed: b === d.btype ? 'true' : 'false', pick: () => this.setDr({ btype: b }) })),
+        saveLbl: d.mode === 'edit' ? 'Save changes' : 'Save',
+        del: () => this.askDelete(d.editId)
+      };
+    }
+
+    const t = this.state.toast || null;
+    const toggle = (id) => () => {
+      const s = this.state.sel || [];
+      this.setState({ sel: s.includes(id) ? s.filter((x) => x !== id) : [...s, id], open: null });
+    };
+    return {
+      views: [['giorno', 'Day'], ['settimana', 'Week'], ['mese', 'Month']].map(([k, l]) => ({
+        label: l, pressed: view === k ? 'true' : 'false',
+        pick: () => this.setState({ view: k, open: null, cur: k === 'giorno' && wdOf(cur) === 6 ? cur - 1 : cur })
+      })),
+      isGrid: view !== 'mese',
+      isMonth: view === 'mese',
+      weekCls: 'week' + (view === 'giorno' ? ' is-day' : ''),
+      gridAria: view === 'giorno' ? 'Day calendar' : 'Week calendar',
+      rangeLbl, prevLbl, nextLbl,
+      ...this.tourVals(items),
+      monthLbl: (() => {
+        if (view === 'mese') return cap(MESI[mm]) + ' ' + my;
+        if (view === 'giorno') return cap(MESI[dOf(cur).getMonth()]);
+        const a = dOf(ws).getMonth(), b = dOf(ws + 5).getMonth();
+        return a === b ? cap(MESI[a]) : cap(MESI[a]) + ' – ' + cap(MESI[b]);
+      })(),
+      goPrev: () => step(-1),
+      goNext: () => step(1),
+      goToday: () => this.setState({ cur: TODAY, pday: TODAY, open: null }),
+      phPrev: () => { const nx = ws - 7; this.setState({ cur: nx, pday: nx, open: null }); },
+      phNext: () => { const nx = ws + 7; this.setState({ cur: nx, pday: nx, open: null }); },
+      allPressed: sel.length === 0 ? 'true' : 'false',
+      showAll: () => this.setState({ sel: [], open: null }),
+      chips: STAFF.map((s) => ({ ...s, cls: 'chip ' + s.c, avCls: 'av av-sm bg-' + s.c, pressed: sel.includes(s.id) ? 'true' : 'false', toggle: toggle(s.id) })),
+      cols,
+      hours,
+      mcells,
+      dayBtns: [0, 1, 2, 3, 4, 5].map((i) => {
+        const off = ws + i;
+        return {
+          dn: WDS[i], dnum: dOf(off).getDate(), full: longLbl(off),
+          cls: 'day-btn' + (off === TODAY ? ' is-today' : ''),
+          pressed: off === pday ? 'true' : 'false',
+          pick: () => this.setState({ pday: off, open: null })
+        };
+      }),
+      dayTitle: cap(longLbl(pday)) + (pday === TODAY ? ' · today' : ''),
+      agenda,
+      agEmpty: agenda.length === 0,
+      isDayV: view === 'giorno',
+      isWeekV: view === 'settimana',
+      phAria: view === 'mese' ? 'Month calendar' : (view === 'settimana' ? 'This week’s appointments' : 'Day schedule'),
+      phWeek: [0, 1, 2, 3, 4, 5].map((i) => {
+        const off = ws + i;
+        const its = visible.filter((a) => a.day === off).sort((a, b) => a.s - b.s);
+        return { title: cap(longLbl(off)).replace(/ \d{4}$/, ''), cls: 'ph-day' + (off === TODAY ? ' is-today' : ''), items: its, empty: its.length === 0 };
+      }),
+      mDayTitle: cap(longLbl(mPday)) + (mPday === TODAY ? ' · today' : ''),
+      mAgenda: visible.filter((a) => a.day === mPday).sort((a, b) => a.s - b.s),
+      mEmpty: visible.filter((a) => a.day === mPday).length === 0,
+      popInGrid: !!oi && view !== 'mese' && ci >= 0,
+      popInSheet: !!oi,
+      pop,
+      closePop: () => this.setState({ open: null }),
+      sheetOvClick: (e) => { if (e.target === e.currentTarget) this.setState({ open: null }); },
+      noteDraft: this.state.noteDraft || '',
+      setNoteDraft: (e) => this.setState({ noteDraft: e.target.value }),
+      saveNote: () => {
+        const tx = (this.state.noteDraft || '').trim();
+        if (!tx || !oi) return;
+        this.setState({ items: items.map((x) => (x.id === oi.id ? { ...x, note: tx } : x)), noteDraft: '' });
+        this.toast('Note saved');
+      },
+      drOpen: !!d,
+      dr: drv,
+      closeDr: () => this.setState({ dr: null }),
+      drOvClick: (e) => { if (e.target === e.currentTarget) this.setState({ dr: null }); },
+      saveDr: () => this.save(),
+      newFromButton: () => this.openNew(view === 'mese' ? TODAY : (offs.includes(TODAY) ? TODAY : offs[0]), 10 * 60 + 30),
+      delOpen: !!delIt,
+      del,
+      cancelDel: () => this.setState({ delId: null }),
+      confirmDel: () => {
+        const all = this.items();
+        this.setState({ items: all.filter((x) => x.id !== delIt.id), delId: null });
+        this.toast(delIt.kind === 'block' ? 'Block deleted' : 'Appointment deleted · ' + delIt.client, all);
+      },
+      toastOn: !!t,
+      toastMsg: t ? t.msg : '',
+      toastUndo: !!(t && t.undo),
+      undo: () => { if (t && t.undo) { const p = { items: t.undo, toast: null }; if (t.undoV) p.vouchers = t.undoV; this.setState(p); } },
+      closeToast: () => this.setState({ toast: null }),
+      onKey: (e) => {
+        if (e.key !== 'Escape') return;
+        const c0 = this.curDr();
+        if (this.state.delId) this.setState({ delId: null });
+        else if (c0 && c0.cOpen) this.setDr({ cOpen: false });
+        else if (c0 && c0.picker) this.setDr({ picker: false });
+        else if (c0) this.setState({ dr: null });
+        else if (this.state.open) this.setState({ open: null });
+      },
+      dows: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      timeOpts: TIMES.map((x) => ({ v: x, l: x })),
+      endOpts: ENDS.map((x) => ({ v: x, l: x })),
+      staffSel: STAFF.map((s) => ({ v: s.id, l: s.name, dot: s.c })),
+      svcSel: SVCS.map((s) => ({ v: s.name, l: s.name, sub: fmtDur(s.dur) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

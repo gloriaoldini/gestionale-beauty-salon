@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Client profile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh">
+<dc-import name="Header" active="clienti" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<a class="back" href="Clienti.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>All clients</a>
+<sc-if value="{{noClient}}" hint-placeholder-val="{{ false }}"><div class="card"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg></span><h2 class="t-h3">No client to show</h2><p class="t-muted">Add a client from the Clients page: here you will see her appointments, vouchers and the creams she bought.</p><div class="first-acts"><a class="btn btn-primary" href="Clienti.html">Go to Clients</a></div></div></div></sc-if>
+<sc-if value="{{hasClient}}" hint-placeholder-val="{{ true }}">
+<div class="page-hd">
+<div style="display: flex; align-items: center; gap: 16px">
+<span class="av av-lg bg-neutral" aria-hidden="true" style="width: 64px; height: 64px; font-size: 22px">{{ini}}</span>
+<div><h1 class="serif t-h1">{{full}}</h1><p class="t-muted">Client profile</p></div>
+</div>
+<a class="btn btn-primary btn-lg" href="Home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New appointment</a>
+</div>
+
+<div class="sc-grid">
+<div class="sc-side">
+
+<section class="card" aria-labelledby="ct-t" style="display: flex; flex-direction: column; gap: 12px">
+<div class="card-hd" style="margin-bottom: 0"><h2 id="ct-t" class="t-h3">Contacts</h2>
+<sc-if value="{{notEditing}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{startEdit}}">Edit</button></sc-if>
+</div>
+<sc-if value="{{notEditing}}" hint-placeholder-val="{{ true }}">
+<div class="sc-contact">
+<a href="{{telHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect><path d="M11 18h2"></path></svg>{{tel}}</a>
+<sc-if value="{{hasEmail}}" hint-placeholder-val="{{ true }}"><a href="{{mailHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5l8.5 6.5 8.5-6.5"></path></svg>{{email}}</a></sc-if>
+<sc-if value="{{noEmail}}" hint-placeholder-val="{{ false }}"><p class="t-muted t-small" style="min-height: 44px; display: flex; align-items: center">No email</p></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{editing}}" hint-placeholder-val="{{ false }}">
+<form style="display: flex; flex-direction: column; gap: 14px" onSubmit="{{saveEdit}}" novalidate>
+<div class="field"><label for="sc-tel">Mobile</label><input id="sc-tel" class="input" type="tel" value="{{dTel}}" onInput="{{setTel}}"></div>
+<div class="field"><label for="sc-email">Email <span class="lbl-sub">(optional)</span></label><input id="sc-email" class="input" type="email" value="{{dEmail}}" onInput="{{setEmail}}"></div>
+<div style="display: flex; gap: 8px; justify-content: flex-end"><button type="button" class="btn btn-secondary btn-sm" onClick="{{cancelEdit}}">Cancel</button><button type="button" onClick="{{saveEdit}}" class="btn btn-primary btn-sm">Save</button></div>
+</form>
+</sc-if>
+</section>
+
+<section class="card" aria-labelledby="cn-t" style="display: flex; flex-direction: column; gap: 12px">
+<div class="card-hd" style="margin-bottom: 0"><h2 id="cn-t" class="t-h3">Client note</h2>
+<sc-if value="{{notNoteEdit}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{startNote}}">{{noteBtn}}</button></sc-if>
+</div>
+<p class="t-small t-muted">Always stays on the profile and shows in every appointment.</p>
+<sc-if value="{{showNote}}" hint-placeholder-val="{{ true }}"><div class="cnote-box"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>Client note</b><span>{{note}}</span></div></sc-if>
+<sc-if value="{{noNote}}" hint-placeholder-val="{{ false }}"><p class="ph-empty">No note. Add allergies, preferences or anything to remember.</p></sc-if>
+<sc-if value="{{noteEdit}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<label for="sc-note" class="sr">Client note</label>
+<textarea id="sc-note" class="{{noteCls}}" placeholder="E.g. latex allergy, sensitive skin…" value="{{dNote}}" onInput="{{setNote}}"></textarea>
+<div style="display: flex; gap: 8px; justify-content: flex-end"><button type="button" class="btn btn-secondary btn-sm" onClick="{{cancelNote}}">Cancel</button><button type="button" class="btn btn-primary btn-sm" onClick="{{saveNote}}">Save note</button></div>
+</div>
+</sc-if>
+<sc-if value="{{saved}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Saved</span></sc-if>
+</section>
+
+<section class="card" aria-labelledby="gv-t" style="display: flex; flex-direction: column; gap: 12px">
+<div class="card-hd" style="margin-bottom: 0"><h2 id="gv-t" class="t-h3">Gift vouchers</h2><a class="link" href="Buoni.html">Go to vouchers</a></div>
+<sc-if value="{{noVouch}}" hint-placeholder-val="{{ false }}"><p class="t-small t-muted">No vouchers received or given.</p></sc-if>
+<ul class="mini-list">
+<sc-for list="{{vList}}" as="v" hint-placeholder-count="1">
+<li><span class="mini-main"><b>{{v.svc}} · € {{v.amount}}</b><small>{{v.role}} · <span class="code">{{v.code}}</span></small></span><span class="{{v.stCls}}"><span class="dot"></span>{{v.stLbl}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+<section class="card" aria-labelledby="pa-t" style="display: flex; flex-direction: column; gap: 12px">
+<div class="card-hd" style="margin-bottom: 0"><h2 id="pa-t" class="t-h3">Creams bought</h2><span class="t-small t-muted">{{buyTot}}</span></div>
+<sc-if value="{{noBuys}}" hint-placeholder-val="{{ false }}"><p class="t-small t-muted">No purchases recorded.</p></sc-if>
+<ul class="mini-list">
+<sc-for list="{{buys}}" as="b" hint-placeholder-count="2">
+<li><span class="mini-main"><b>{{b.name}}</b><small>{{b.when}}</small></span><span style="font-weight: 600">{{b.price}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+</div>
+
+<div class="sc-main">
+<div class="sc-kpis">
+<section class="card kpi" aria-labelledby="k1"><h2 id="k1" class="t-over">Appointments</h2><p class="num">{{total}}</p><p class="sub">nel calendario</p></section>
+<section class="card kpi" aria-labelledby="k2"><h2 id="k2" class="t-over">Last visit</h2><p class="num" style="font-size: 30px">{{lastLbl}}</p><p class="sub">{{lastSub}}</p></section>
+<section class="card kpi" aria-labelledby="k3"><h2 id="k3" class="t-over">Next appointment</h2><p class="num" style="font-size: 30px">{{nextLbl}}</p><p class="sub">{{nextSub}}</p></section>
+</div>
+
+<section class="card" aria-labelledby="up-t">
+<h2 id="up-t" class="t-h3" style="margin-bottom: 8px">{{first}}’s upcoming appointments</h2>
+<sc-if value="{{noUp}}" hint-placeholder-val="{{ false }}"><p class="t-muted">No upcoming appointments.</p></sc-if>
+<ul class="hist">
+<sc-for list="{{upcoming}}" as="a" hint-placeholder-count="2">
+<li>
+<span class="hd">{{a.dateLbl}}<small>{{a.time}}</small></span>
+<span><b style="font-weight: 600">{{a.tr}}</b><span class="who t-small" style="display: flex; align-items: center; gap: 6px; margin-top: 4px; color: #6B5F62"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>with {{a.staff.name}}</span>
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><span class="t-small" style="display: block; margin-top: 4px; color: #4F4446">Appointment note: {{a.note}}</span></sc-if></span>
+<span class="tag tag-rose">Upcoming</span>
+</li>
+</sc-for>
+</ul>
+</section>
+
+<section class="card" aria-labelledby="hi-t">
+<h2 id="hi-t" class="t-h3" style="margin-bottom: 8px">{{first}}’s history</h2>
+<sc-if value="{{noPast}}" hint-placeholder-val="{{ false }}"><p class="t-muted">No visits yet.</p></sc-if>
+<ul class="hist">
+<sc-for list="{{past}}" as="a" hint-placeholder-count="3">
+<li>
+<span class="hd">{{a.dateLbl}}<small>{{a.time}}</small></span>
+<span><b style="font-weight: 600">{{a.tr}}</b><span class="who t-small" style="display: flex; align-items: center; gap: 6px; margin-top: 4px; color: #6B5F62"><span class="{{a.iniCls}}" aria-hidden="true">{{a.staff.ini}}</span>with {{a.staff.name}}</span>
+<sc-if value="{{a.hasNote}}" hint-placeholder-val="{{ false }}"><span class="t-small" style="display: block; margin-top: 4px; color: #4F4446">Appointment note: {{a.note}}</span></sc-if></span>
+<span class="{{a.payCls}}"><span class="dot"></span>{{a.pay}}</span>
+</li>
+</sc-for>
+</ul>
+</section>
+</div>
+</div>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"client":{"editor":"enum","options":["c9","c1","c21","c36"],"default":"c9"},"$preview":{"width":1440,"height":2100}}'>
+const STAFF = [
+  { id: 'b', name: 'Bianca Neri', ini: 'B', c: 'c1' },
+  { id: 'c', name: 'Chiara Ferri', ini: 'C', c: 'c2' },
+  { id: 'm', name: 'Martina Sole', ini: 'M', c: 'c3' },
+  { id: 'n', name: 'Noemi Riva', ini: 'N', c: 'c4' }
+];
+const TODAY = 3;
+const NOW = 10 * 60 + 10;
+const WDS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MESI3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dOf = (off) => new Date(2026, 10, 9 + off);
+const wdOf = (off) => ((off % 7) + 7) % 7;
+const lbl = (off) => { const d = dOf(off); return WDS[wdOf(off)] + ' ' + d.getDate() + ' ' + MESI3[d.getMonth()]; };
+const pad = (n) => (n < 10 ? '0' : '') + n;
+const fmt = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const toMin = (s) => { const p = s.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+// Stessi dati del Calendario
+const APPTS = [
+  [0, '09:00', '10:00', 'Anna Galli', 'Deep cleansing facial', 'b'], [0, '09:00', '10:00', 'Sara Bassi', 'Relaxing massage', 'c'], [0, '09:30', '10:30', 'Elisa Monti', 'Deep cleansing facial', 'm'], [0, '10:00', '11:00', 'Laura Pini', 'Lymphatic drainage', 'n'], [0, '11:00', '12:30', 'Marta Rossetti', 'Body treatment', 'b'], [0, '14:00', '15:00', 'Giada Fumi', 'Skin consultation', 'c'], [0, '15:00', '16:00', 'Paola Riccio', 'Relaxing massage', 'm'], [0, '16:00', '17:00', 'Irma Basile', 'Lymphatic drainage', 'n'],
+  [1, '09:00', '10:00', 'Silvia Moro', 'Relaxing massage', 'c'], [1, '09:00', '10:00', 'Clara Doni', 'Lymphatic drainage', 'm'], [1, '10:30', '11:30', 'Vera Longhi', 'Deep cleansing facial', 'b'], [1, '11:00', '12:00', 'Rita Sala', 'Deep cleansing facial', 'n'], [1, '14:00', '15:00', 'Ada Pozzi', 'Body treatment', 'm'], [1, '16:00', '17:30', 'Nora Ghidi', 'Relaxing massage', 'c'],
+  [2, '09:00', '10:00', 'Alice Rota', 'Skin consultation', 'n'], [2, '09:30', '11:00', 'Bice Ferro', 'Lymphatic drainage', 'm'], [2, '10:30', '11:30', 'Elena Gori', 'Body treatment', 'b'], [2, '12:00', '13:00', 'Dora Vitali', 'Deep cleansing facial', 'm'], [2, '14:00', '15:00', 'Ines Carli', 'Relaxing massage', 'b'], [2, '15:00', '16:00', 'Lia Bruni', 'Relaxing massage', 'n'],
+  [3, '09:00', '10:00', 'Pia Marchi', 'Skin consultation', 'b'], [3, '11:00', '12:00', 'Olga Brera', 'Relaxing massage', 'c'], [3, '13:00', '14:00', 'Tea Ferrante', 'Deep cleansing facial', 'n'], [3, '14:00', '15:00', 'Gaia Orsi', 'Lymphatic drainage', 'c'], [3, '15:00', '16:00', 'Sofia Lodi', 'Lymphatic drainage', 'b'], [3, '17:00', '18:00', 'Rosa Bassani', 'Relaxing massage', 'n'],
+  [4, '09:00', '10:00', 'Carla Duse', 'Relaxing massage', 'c'], [4, '09:30', '10:30', 'Dafne Mori', 'Deep cleansing facial', 'n'], [4, '11:00', '12:00', 'Lisa Esposti', 'Body treatment', 'b'], [4, '12:00', '13:00', 'Ada Volpe', 'Skin consultation', 'm'], [4, '15:00', '16:00', 'Nadia Cerri', 'Relaxing massage', 'm'], [4, '16:00', '17:30', 'Livia Peri', 'Deep cleansing facial', 'c'], [4, '18:00', '19:00', 'Cora Landi', 'Deep cleansing facial', 'b'],
+  [5, '09:00', '10:00', 'Marta Zeni', 'Relaxing massage', 'b'], [5, '10:00', '11:00', 'Viola Arno', 'Relaxing massage', 'm'], [5, '10:00', '11:00', 'Arianna Pace', 'Skin consultation', 'n'], [5, '11:00', '12:00', 'Irene Vigo', 'Body treatment', 'c'], [5, '13:00', '14:00', 'Aurora Tosi', 'Lymphatic drainage', 'c'], [5, '15:00', '16:00', 'Bea Lanza', 'Lymphatic drainage', 'n']
+];
+const NOTES = { 2: 'Brings the products she uses at home', 15: 'Swollen ankles: focus on the legs', 22: 'First time at the salon', 35: 'Ask how the home routine is going' };
+const CNOTES = {
+  'Anna Galli': 'Sensitive skin: avoid scented products', 'Silvia Moro': 'Latex allergy', 'Marta Rossetti': 'Prefers light pressure',
+  'Nora Ghidi': 'Usually arrives 10 minutes early', 'Carla Duse': 'Lower back discomfort', 'Pia Marchi': 'Nickel allergy', 'Gaia Orsi': 'Prefers quiet music'
+};
+const CL_NAMES = ['Anna Galli', 'Sara Bassi', 'Elisa Monti', 'Laura Pini', 'Marta Rossetti', 'Giada Fumi', 'Paola Riccio', 'Irma Basile', 'Silvia Moro', 'Clara Doni', 'Vera Longhi', 'Rita Sala', 'Ada Pozzi', 'Nora Ghidi', 'Alice Rota', 'Bice Ferro', 'Elena Gori', 'Dora Vitali', 'Ines Carli', 'Lia Bruni', 'Pia Marchi', 'Olga Brera', 'Tea Ferrante', 'Gaia Orsi', 'Sofia Lodi', 'Rosa Bassani', 'Carla Duse', 'Dafne Mori', 'Lisa Esposti', 'Ada Volpe', 'Nadia Cerri', 'Livia Peri', 'Cora Landi', 'Marta Zeni', 'Viola Arno', 'Arianna Pace', 'Irene Vigo', 'Aurora Tosi', 'Bea Lanza'];
+const CLIENTS0 = CL_NAMES.map((n, i) => {
+  const p = n.split(' ');
+  return { id: 'c' + (i + 1), nome: p[0], cognome: p.slice(1).join(' '), tel: '+39 300 000 ' + String(101 + i).padStart(4, '0'), email: i % 7 === 3 ? '' : (p[0] + '.' + p.slice(1).join('')).toLowerCase() + '@mail.demo', note: CNOTES[n] || '' };
+});
+const ALL = [];
+APPTS.forEach((a, i) => ALL.push({ day: a[0], s: toMin(a[1]), e: toMin(a[2]), client: a[3], tr: a[4], op: a[5], note: NOTES[i] || '' }));
+// Da sabato 1 agosto a giovedì 31 dicembre 2026 (esclusi i festivi nazionali)
+const offOf = (y, m, d) => Math.round((Date.UTC(y, m, d) - Date.UTC(2026, 10, 9)) / 864e5);
+const FIRST = offOf(2026, 7, 1), LAST = offOf(2026, 11, 31);
+const HOLIDAYS = [offOf(2026, 7, 15), offOf(2026, 11, 8), offOf(2026, 11, 25), offOf(2026, 11, 26)];
+for (let k = -15; k <= 7; k++) {
+  if (k === 0) continue;
+  APPTS.forEach((a, i) => {
+    const day = a[0] + 7 * k;
+    if (day < FIRST || day > LAST || HOLIDAYS.includes(day)) return;
+    if ((((i * 7 + k * 3) % 5) + 5) % 5 === 0) return;
+    const ci = (((CL_NAMES.indexOf(a[3]) + 5 * k) % 39) + 39) % 39;
+    ALL.push({ day, s: toMin(a[1]), e: toMin(a[2]), client: CL_NAMES[ci], tr: a[4], op: a[5], note: '' });
+  });
+}
+// Stessi prodotti, vendite e buoni delle altre pagine
+const PRODUCTS0 = [
+  { id: 'p1', name: 'Hydrating face cream', desc: 'For dry and sensitive skin, for daily use', size: '50 ml', price: 32, stock: 12 },
+  { id: 'p2', name: 'Nourishing body cream', desc: 'Rich texture, ideal after a scrub', size: '200 ml', price: 28, stock: 3 },
+  { id: 'p3', name: 'Repairing hand cream', desc: 'Absorbs quickly, not greasy', size: '75 ml', price: 14, stock: 20 }
+];
+// Vendite di esempio: [giorno, ora, id prodotto, cliente] · giorno 0 = lunedì 9 novembre 2026
+const SALES0 = [
+  [-44, '10:00', 'p1', 'Anna Galli'], [-39, '16:20', 'p3', 'Vera Longhi'], [-34, '11:45', 'p2', 'Clara Doni'],
+  [-7, '11:15', 'p2', 'Marta Rossetti'], [-6, '17:00', 'p1', 'Sara Bassi'], [-4, '10:40', 'p3', 'Silvia Moro'], [-3, '12:30', 'p1', 'Laura Pini'], [-2, '15:10', 'p2', 'Giada Fumi'],
+  [0, '10:20', 'p1', 'Anna Galli'], [0, '16:05', 'p3', 'Paola Riccio'], [1, '12:10', 'p2', 'Ada Pozzi'], [2, '09:50', 'p1', 'Alice Rota'], [2, '11:30', 'p3', 'Elena Gori'], [2, '15:40', 'p3', ''], [3, '09:45', 'p1', 'Pia Marchi']
+].map((x, i) => { const p = PRODUCTS0.find((q) => q.id === x[2]); return { id: 's' + (i + 1), day: x[0], time: x[1], pid: p.id, name: p.name, price: p.price, client: x[3] }; });
+const VOUCHERS0 = [
+  { id: 'v1', code: 'GB-4821', svc: 'Anti-ageing facial', amount: 75, from: 'Anna Galli', to: 'Sara Bassi', created: offOf(2026, 9, 2), expires: offOf(2027, 3, 2), used: null },
+  { id: 'v2', code: 'GB-6142', svc: 'Deep cleansing facial', amount: 60, from: 'Paola Riccio', to: 'Tea Ferrante', created: offOf(2026, 10, 10), expires: offOf(2027, 4, 10), used: null },
+  { id: 'v3', code: 'GB-3307', svc: 'Relaxing massage', amount: 55, from: 'Marta Rossetti', to: 'Silvia Moro', created: offOf(2026, 8, 15), expires: offOf(2027, 2, 15), used: offOf(2026, 9, 20) },
+  { id: 'v4', code: 'GB-5590', svc: 'Body scrub', amount: 40, from: 'Vera Longhi', to: 'Lia Bruni', created: offOf(2026, 7, 10), expires: offOf(2026, 10, 10), used: null },
+  { id: 'v5', code: 'GB-7215', svc: 'Body treatment', amount: 80, from: 'Rosa Bassani', to: 'Gaia Orsi', created: offOf(2026, 9, 28), expires: null, used: null },
+  { id: 'v6', code: 'GB-2954', svc: 'Lymphatic drainage', amount: 60, from: 'Clara Doni', to: 'Nora Ghidi', created: offOf(2026, 5, 1), expires: offOf(2026, 11, 1), used: null }
+];
+const MESI3B = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dShort = (off) => { const d = new Date(2026, 10, 9 + off); return d.getDate() + ' ' + MESI3B[d.getMonth()] + ' ' + d.getFullYear(); };
+const eur = (n) => '€ ' + String(Math.round(n * 100) / 100).replace('.', ',');
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient', 'products', 'vouchers', 'sales'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  renderVals() {
+    const clients = this.state.clients ?? CLIENTS0;
+    const id = this.state.selClient ?? (this.props.client || 'c9');
+    const found = clients.find((x) => x.id === id) || clients.find((x) => x.id === 'c9') || clients[0];
+    const base = found || { id: '', nome: '', cognome: '', tel: '', email: '', note: '' };
+    const c = base;
+    const upd = (patch) => clients.map((x) => (x.id === base.id ? { ...x, ...patch } : x));
+    const ALLSTAFF = this.state.members ? this.state.members.map((m) => ({ id: m.id, name: (m.nome + ' ' + (m.cognome || '')).trim(), ini: (m.nome || '?').charAt(0).toUpperCase(), c: m.c })) : STAFF;
+    const SRC = this.state.items ? this.state.items.filter((a) => a.kind !== 'block') : ALL;
+    const full = c.nome + ' ' + c.cognome;
+    const isPast = (a) => a.day < TODAY || (a.day === TODAY && a.e <= NOW);
+    const mine = SRC.filter((a) => a.client === base.nome + ' ' + base.cognome).map((a) => {
+      const st = ALLSTAFF.find((s) => s.id === a.op) || { name: 'Removed staff member', ini: '?', c: 'c6' };
+      const past = isPast(a);
+      const paid = a.paid !== undefined ? a.paid : past;
+      return { ...a, staff: st, iniCls: 'ini bg-' + st.c, dateLbl: lbl(a.day), time: fmt(a.s) + ' – ' + fmt(a.e), hasNote: !!a.note, past, pay: paid ? 'Paid' : 'Unpaid', payCls: 'tag ' + (paid ? 'tag-ok' : 'tag-danger') };
+    });
+    const past = mine.filter((a) => a.past).sort((a, b) => b.day - a.day || b.s - a.s);
+    const upcoming = mine.filter((a) => !a.past).sort((a, b) => a.day - b.day || a.s - b.s);
+    // Buoni regalo ricevuti o regalati
+    const vouchers = this.state.vouchers ?? VOUCHERS0;
+    const vSt = (v) => (v.used !== null && v.used !== undefined ? 'usato' : (v.expires !== null && v.expires !== undefined && v.expires < TODAY ? 'scaduto' : 'valido'));
+    const vList = vouchers.filter((v) => v.to === full || v.from === full).sort((a, b) => b.created - a.created).map((v) => {
+      const st = vSt(v);
+      return {
+        code: v.code, svc: v.svc, amount: String(v.amount || 0).replace('.', ','),
+        role: v.to === full ? 'Received from ' + v.from : 'Given to ' + v.to,
+        stLbl: st === 'valido' ? 'Valid' : (st === 'usato' ? 'Used' : 'Expired'),
+        stCls: 'tag ' + (st === 'valido' ? 'tag-ok' : (st === 'usato' ? 'tag-neutral' : 'tag-danger'))
+      };
+    });
+    // Creme comprate
+    const buys = (this.state.sales ?? SALES0).filter((x) => x.client === full).sort((a, b) => b.day - a.day || (b.time > a.time ? 1 : -1));
+    const editing = !!this.state.editing;
+    const noteEdit = !!this.state.noteEdit;
+    const set = (k) => (e) => this.setState({ [k]: e.target.value });
+    return {
+      full, first: c.nome, ini: ((c.nome || ' ')[0] + ((c.cognome || '')[0] || '')).toUpperCase(),
+      noClient: !found, hasClient: !!found,
+      tel: c.tel, telHref: 'tel:' + c.tel.replace(/\s/g, ''),
+      email: c.email, mailHref: 'mailto:' + c.email, hasEmail: !!c.email, noEmail: !c.email,
+      editing, notEditing: !editing,
+      startEdit: () => this.setState({ editing: true, dTel: c.tel, dEmail: c.email, saved: false }),
+      cancelEdit: () => this.setState({ editing: false }),
+      dTel: this.state.dTel ?? c.tel, dEmail: this.state.dEmail ?? c.email,
+      setTel: set('dTel'), setEmail: set('dEmail'),
+      saveEdit: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ clients: upd({ tel: (this.state.dTel ?? c.tel).trim(), email: (this.state.dEmail ?? c.email).trim() }), editing: false, saved: true }); },
+      note: c.note, showNote: !!c.note && !noteEdit, noNote: !c.note && !noteEdit,
+      noteEdit, notNoteEdit: !noteEdit,
+      noteBtn: c.note ? 'Edit' : 'Add',
+      startNote: () => this.setState({ noteEdit: true, dNote: c.note, saved: false }),
+      cancelNote: () => this.setState({ noteEdit: false }),
+      dNote: this.state.dNote ?? c.note,
+      setNote: set('dNote'),
+      noteCls: 'textarea' + ((this.state.dNote ?? c.note) ? ' is-cnote' : ''),
+      saveNote: () => this.setState({ clients: upd({ note: (this.state.dNote ?? '').trim() }), noteEdit: false, saved: true }),
+      saved: !!this.state.saved,
+      total: mine.length,
+      lastLbl: past[0] ? past[0].dateLbl : '—',
+      lastSub: past[0] ? past[0].tr + ' · with ' + past[0].staff.name : 'No visits yet',
+      nextLbl: upcoming[0] ? upcoming[0].dateLbl : '—',
+      nextSub: upcoming[0] ? fmt(upcoming[0].s) + ' · ' + upcoming[0].tr : 'No upcoming appointments',
+      upcoming, past,
+      vList, noVouch: vList.length === 0,
+      buys: buys.map((x) => ({ name: x.name, when: dShort(x.day), price: eur(x.price) })),
+      noBuys: buys.length === 0,
+      buyTot: buys.length ? (buys.length === 1 ? '1 purchase' : buys.length + ' purchases') + ' · ' + eur(buys.reduce((t, x) => t + x.price, 0)) : '',
+      noUp: upcoming.length === 0, noPast: past.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

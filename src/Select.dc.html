@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropdown</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="background: transparent; container-type: normal">
+<div class="gsel" onKeyDown="{{onKey}}">
+<button type="button" id="{{uid}}" class="{{btnCls}}" aria-haspopup="listbox" aria-expanded="{{exp}}" aria-controls="{{listId}}" aria-label="{{aria}}" aria-invalid="{{inv}}" aria-activedescendant="{{activeId}}" onClick="{{toggle}}" onBlur="{{blur}}">
+<span class="gsel-val">
+<sc-if value="{{hasDot}}" hint-placeholder-val="{{ false }}"><span class="{{dotCls}}" aria-hidden="true"></span></sc-if>
+<span class="{{txtCls}}">{{display}}</span>
+<sc-if value="{{hasSub}}" hint-placeholder-val="{{ false }}"><span class="gsel-sub">{{sub}}</span></sc-if>
+</span>
+<svg class="gsel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{open}}" hint-placeholder-val="{{ false }}">
+<ul id="{{listId}}" class="gsel-list" role="listbox" aria-label="{{label}}">
+<sc-for list="{{opts}}" as="o" hint-placeholder-count="4">
+<li id="{{o.id}}" role="option" aria-selected="{{o.sel}}" class="{{o.cls}}" onMouseDown="{{o.down}}">
+<sc-if value="{{o.hasDot}}" hint-placeholder-val="{{ false }}"><span class="{{o.dotCls}}" aria-hidden="true"></span></sc-if>
+<span class="gsel-ol">{{o.l}}</span>
+<sc-if value="{{o.hasSub}}" hint-placeholder-val="{{ false }}"><span class="gsel-sub">{{o.sub}}</span></sc-if>
+<svg class="gsel-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"options":{"editor":null},"value":{"editor":"text","default":""},"placeholder":{"editor":"text","default":"Seleziona"},"label":{"editor":"text","default":"Operatrice"},"uid":{"editor":"text","default":"demo-sel"},"invalid":{"editor":"boolean","default":false},"onChange":{"editor":null},"$preview":{"width":360,"height":360}}'>
+const DEMO_OPTS = [
+  { v: 'b', l: 'Bianca Neri', dot: 'c1' },
+  { v: 'c', l: 'Chiara Ferri', dot: 'c2' },
+  { v: 'm', l: 'Martina Sole', dot: 'c3' },
+  { v: 'n', l: 'Noemi Riva', dot: 'c4' }
+];
+class Component extends DCLogic {
+  opts() {
+    const o = this.props.options;
+    if (!Array.isArray(o)) return DEMO_OPTS;
+    return o.map((x) => (typeof x === 'string' ? { v: x, l: x } : x));
+  }
+  curValue() {
+    if (this.props.onChange) return this.props.value ?? '';
+    return this.state.value ?? (this.props.value ?? '');
+  }
+  choose(v) {
+    if (this.props.onChange) this.props.onChange({ target: { value: v } });
+    else this.setState({ value: v });
+    this.setState({ open: false });
+  }
+  renderVals() {
+    const opts = this.opts();
+    const uid = this.props.uid || 'sel';
+    const value = String(this.curValue());
+    const open = !!this.state.open;
+    const selIdx = opts.findIndex((o) => String(o.v) === value);
+    const active = this.state.active ?? selIdx;
+    const cur = selIdx >= 0 ? opts[selIdx] : null;
+    const label = this.props.label || '';
+    const invalid = this.props.invalid === true || this.props.invalid === 'true';
+    const n = opts.length;
+    return {
+      uid,
+      label,
+      listId: uid + '-list',
+      open,
+      exp: open ? 'true' : 'false',
+      inv: invalid ? 'true' : 'false',
+      btnCls: 'input gsel-btn' + (invalid ? ' is-error' : ''),
+      aria: label + ': ' + (cur ? cur.l : (this.props.placeholder || 'Select')),
+      activeId: open && active >= 0 ? uid + '-o' + active : undefined,
+      display: cur ? cur.l : (this.props.placeholder || 'Select'),
+      txtCls: 'gsel-txt' + (cur ? '' : ' gsel-ph'),
+      hasDot: !!(cur && cur.dot), dotCls: 'gsel-dot bg-' + (cur && cur.dot ? cur.dot : ''),
+      hasSub: !!(cur && cur.sub), sub: cur && cur.sub ? cur.sub : '',
+      toggle: () => this.setState({ open: !open, active: selIdx >= 0 ? selIdx : 0 }),
+      blur: () => { if (this.state.open) this.setState({ open: false }); },
+      opts: opts.map((o, i) => ({
+        ...o,
+        id: uid + '-o' + i,
+        sel: i === selIdx ? 'true' : 'false',
+        cls: 'gsel-opt' + (open && i === active ? ' is-active' : ''),
+        hasDot: !!o.dot, dotCls: 'gsel-dot bg-' + (o.dot || ''),
+        hasSub: !!o.sub,
+        down: (e) => { if (e && e.preventDefault) e.preventDefault(); this.choose(o.v); }
+      })),
+      onKey: (e) => {
+        const k = e.key;
+        if (!open) {
+          if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === ' ') {
+            e.preventDefault();
+            this.setState({ open: true, active: selIdx >= 0 ? selIdx : 0 });
+          }
+          return;
+        }
+        if (k === 'ArrowDown') { e.preventDefault(); this.setState({ active: Math.min(n - 1, active + 1) }); }
+        else if (k === 'ArrowUp') { e.preventDefault(); this.setState({ active: Math.max(0, active - 1) }); }
+        else if (k === 'Home') { e.preventDefault(); this.setState({ active: 0 }); }
+        else if (k === 'End') { e.preventDefault(); this.setState({ active: n - 1 }); }
+        else if (k === 'Enter' || k === ' ') { e.preventDefault(); if (active >= 0 && opts[active]) this.choose(opts[active].v); }
+        else if (k === 'Escape') { e.preventDefault(); if (e.stopPropagation) e.stopPropagation(); this.setState({ open: false }); }
+        else if (k === 'Tab') { this.setState({ open: false }); }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh">
+<dc-import name="Header" active="profilo" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Profile</h1>
+<p class="t-muted">Sign-in, team and salon settings.</p>
+</div>
+</div>
+
+<div class="prof-grid">
+<aside class="card prof-side" aria-label="Account summary">
+<span class="av-user av-user-lg" aria-hidden="true"><svg viewBox="0 0 40 40" fill="currentColor"><circle cx="20" cy="15.5" r="7"></circle><path d="M5.86 34.14C8.6 28.2 13.9 25 20 25s11.4 3.2 14.14 9.14A20 20 0 0 1 5.86 34.14z"></path></svg></span>
+<p class="t-h3">{{centro}}</p>
+<p class="t-small t-muted" style="word-break: break-all">{{email}}</p>
+<a class="btn btn-secondary btn-block" href="Login.html" style="margin-top: 8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l4-4-4-4M14 12H4"></path></svg>Sign out</a>
+</aside>
+
+<div class="prof-main">
+
+<form class="card prof-sec" aria-labelledby="pd-t" onSubmit="{{saveData}}" novalidate>
+<h2 id="pd-t" class="t-h3">Salon account</h2>
+<div class="form-grid">
+<div class="field"><label for="p-nome">Contact first name</label><input id="p-nome" class="input" type="text" value="{{nome}}" onInput="{{setNome}}" autocomplete="given-name"></div>
+<div class="field"><label for="p-cognome">Contact last name</label><input id="p-cognome" class="input" type="text" value="{{cognome}}" onInput="{{setCognome}}" autocomplete="family-name"></div>
+<div class="field"><label for="p-email">Email</label><input id="p-email" class="input" type="email" value="{{email}}" onInput="{{setEmail}}" autocomplete="email"></div>
+<div class="field"><label for="p-tel">Mobile</label><input id="p-tel" class="input" type="tel" value="{{tel}}" onInput="{{setTel}}" autocomplete="tel"></div>
+</div>
+<div class="sec-ft">
+<sc-if value="{{okData}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Details saved</span></sc-if>
+<button type="button" onClick="{{saveData}}" class="btn btn-primary">Save details</button>
+</div>
+</form>
+
+<form class="card prof-sec" aria-labelledby="pw-t" onSubmit="{{savePw}}" novalidate>
+<h2 id="pw-t" class="t-h3">Password</h2>
+<div class="form-grid">
+<div class="field span2"><label for="p-old">Current password</label><input id="p-old" class="{{oldCls}}" type="{{pwType}}" autocomplete="current-password" value="{{pwOld}}" onInput="{{setOld}}">
+<sc-if value="{{errOld}}" hint-placeholder-val="{{ false }}"><span class="err">Enter the current password</span></sc-if></div>
+<div class="field"><label for="p-new">New password</label><input id="p-new" class="{{newCls}}" type="{{pwType}}" autocomplete="new-password" value="{{pwNew}}" onInput="{{setNew}}">
+<sc-if value="{{errNew}}" hint-placeholder-val="{{ false }}"><span class="err">Write the new password</span></sc-if></div>
+<div class="field"><label for="p-rep">Repeat the new password</label><input id="p-rep" class="{{repCls}}" type="{{pwType}}" autocomplete="new-password" value="{{pwRep}}" onInput="{{setRep}}">
+<sc-if value="{{errRep}}" hint-placeholder-val="{{ false }}"><span class="err">The two passwords don’t match</span></sc-if></div>
+<label class="check span2"><input type="checkbox" checked="{{showPw}}" onChange="{{toggleShow}}">Show passwords</label>
+</div>
+<div class="sec-ft">
+<sc-if value="{{okPw}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Password updated</span></sc-if>
+<button type="button" onClick="{{savePw}}" class="btn btn-primary">Change password</button>
+</div>
+</form>
+
+<section class="card prof-sec" aria-labelledby="pt-t">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<h2 id="pt-t" class="t-h3">Team</h2>
+<a class="btn btn-secondary" href="Team.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg>Manage team</a>
+</div>
+<p class="t-muted" style="margin-top: -8px">The salon’s staff and their colour in the calendar. To add, edit or change colours use “Manage team”.</p>
+<ul class="tm-list">
+<sc-for list="{{team}}" as="m" hint-placeholder-count="5">
+<li class="tm-item"><span class="{{m.avCls}}" aria-hidden="true">{{m.ini}}</span><span class="tm-main"><b>{{m.name}}</b><span class="color-lbl"><span class="{{m.dotCls}}" aria-hidden="true"></span>{{m.colorLbl}}</span></span><span class="{{m.stCls}}"><span class="dot"></span>{{m.st}}</span></li>
+</sc-for>
+</ul>
+</section>
+
+<form class="card prof-sec" aria-labelledby="pc-t" onSubmit="{{saveCentro}}" novalidate>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<h2 id="pc-t" class="t-h3">Your salon</h2>
+</div>
+<div class="field"><label for="p-centro">Salon name</label><input id="p-centro" class="input" type="text" value="{{centro}}" onInput="{{setCentro}}"></div>
+<div class="sec-ft">
+<sc-if value="{{okCentro}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Salon updated</span></sc-if>
+<button type="button" onClick="{{saveCentro}}" class="btn btn-primary">Save salon</button>
+</div>
+</form>
+
+<form class="card prof-sec" aria-labelledby="pp-t" onSubmit="{{savePref}}" novalidate>
+<h2 id="pp-t" class="t-h3">Preferences</h2>
+<div class="field" style="max-width: 360px"><label for="p-vista">Calendar view when opening</label>
+<dc-import name="Select" uid="p-vista" label="Calendar view when opening" options="{{vistaOpts}}" value="{{vista}}" on-change="{{setVista}}" hint-size="100%,52px"></dc-import>
+</div>
+<div class="sec-ft">
+<sc-if value="{{okPref}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Preferences saved</span></sc-if>
+<button type="button" onClick="{{savePref}}" class="btn btn-primary">Save preferences</button>
+</div>
+</form>
+
+<section class="card prof-sec" aria-labelledby="pr-t">
+<h2 id="pr-t" class="t-h3">Prototype data</h2>
+<p class="t-muted">Changes you make while trying the prototype (appointments, clients, treatments, staff) are saved in this browser and show on every page.</p>
+<div class="sec-ft">
+<sc-if value="{{okReset}}" hint-placeholder-val="{{ false }}"><span class="ok-msg" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>{{okResetLbl}}</span></sc-if>
+<button type="button" class="btn btn-secondary" onClick="{{resetEmpty}}">Try the first sign-in (all empty)</button>
+<button type="button" class="btn btn-secondary" onClick="{{resetDemo}}">Restore the sample data</button>
+</div>
+</section>
+
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2700}}'>
+const MEMBERS = [
+  { id: 'b', nome: 'Bianca', cognome: 'Neri', c: 'c1', active: true },
+  { id: 'c', nome: 'Chiara', cognome: 'Ferri', c: 'c2', active: true },
+  { id: 'm', nome: 'Martina', cognome: 'Sole', c: 'c3', active: true },
+  { id: 'n', nome: 'Noemi', cognome: 'Riva', c: 'c4', active: true },
+  { id: 'i', nome: 'Irene', cognome: 'Valli', c: 'c5', active: false }
+];
+const COLOR_NAMES = { c1: 'purple', c2: 'teal', c3: 'amber', c4: 'blue', c5: 'green', c6: 'custom' };
+const SHARED_KEY = 'gb-demo-v4';
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
+    this._pull = () => { try { const s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; if (s.members) this.setState({ members: s.members }); } catch (e) {} };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  renderVals() {
+    const team = (this.state.members ?? MEMBERS).map((m) => ({
+      name: (m.nome + ' ' + (m.cognome || '')).trim(),
+      ini: ((m.nome || '?')[0] + ((m.cognome || '')[0] || '')).toUpperCase(),
+      avCls: 'av av-sm bg-' + m.c, dotCls: 'gsel-dot bg-' + m.c,
+      colorLbl: 'Colour: ' + (COLOR_NAMES[m.c] || ''),
+      st: m.active === false ? 'Inactive' : 'Active',
+      stCls: 'tag ' + (m.active === false ? 'tag-neutral' : 'tag-ok')
+    }));
+    const s = this.state;
+    const v = (k, d) => (s[k] ?? d);
+    const pw = { old: v('pwOld', 'demo2026'), nw: v('pwNew', ''), rep: v('pwRep', '') };
+    const pe = s.pwErr || {};
+    const stop = (e) => { if (e && e.preventDefault) e.preventDefault(); };
+    const set = (k) => (e) => this.setState({ [k]: e.target.value, okData: false, okPw: false, okCentro: false, okPref: false });
+    return {
+      team,
+      nome: v('nome', 'Bianca'), cognome: v('cognome', 'Neri'),
+      email: v('email', 'bianca@centrolumen.demo'), tel: v('tel', '+39 300 000 0001'),
+      centro: v('centro', 'Centro Lumen'),
+      vista: v('vista', 'settimana'),
+      vistaOpts: [{ v: 'giorno', l: 'Day' }, { v: 'settimana', l: 'Week' }, { v: 'mese', l: 'Month' }],
+      setNome: set('nome'), setCognome: set('cognome'), setEmail: set('email'), setTel: set('tel'), setCentro: set('centro'),
+      setVista: (e) => this.setState({ vista: e.target.value, okPref: false }),
+      pwOld: pw.old, pwNew: pw.nw, pwRep: pw.rep,
+      setOld: set('pwOld'), setNew: set('pwNew'), setRep: set('pwRep'),
+      showPw: !!s.showPw,
+      pwType: s.showPw ? 'text' : 'password',
+      toggleShow: () => this.setState({ showPw: !s.showPw }),
+      errOld: !!pe.old, errNew: !!pe.nw, errRep: !!pe.rep,
+      oldCls: 'input' + (pe.old ? ' is-error' : ''), newCls: 'input' + (pe.nw ? ' is-error' : ''), repCls: 'input' + (pe.rep ? ' is-error' : ''),
+      okData: !!s.okData, okPw: !!s.okPw, okCentro: !!s.okCentro, okPref: !!s.okPref,
+      okReset: !!s.okReset, okResetLbl: s.okReset === 'vuoto' ? 'Data cleared: try the first sign-in' : 'Sample data restored',
+      resetEmpty: () => { const members = (s.members ?? MEMBERS).filter((m) => m.active !== false); try { window.localStorage.setItem('gb-demo-v4', JSON.stringify({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [], members })); } catch (e) {} this.setState({ okReset: 'vuoto', members }); },
+      resetDemo: () => { try { window.localStorage.removeItem('gb-demo-v4'); } catch (e) {} this.setState({ okReset: 'demo', members: null }); },
+      saveData: (e) => { stop(e); this.setState({ okData: true }); },
+      saveCentro: (e) => { stop(e); this.setState({ okCentro: true }); },
+      savePref: (e) => { stop(e); this.setState({ okPref: true }); },
+      savePw: (e) => {
+        stop(e);
+        const err = {};
+        if (!pw.old) err.old = 1;
+        if (!pw.nw) err.nw = 1;
+        if (pw.nw && pw.rep !== pw.nw) err.rep = 1;
+        if (Object.keys(err).length) { this.setState({ pwErr: err, okPw: false }); return; }
+        this.setState({ pwErr: {}, okPw: true, pwOld: pw.nw, pwNew: '', pwRep: '' });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

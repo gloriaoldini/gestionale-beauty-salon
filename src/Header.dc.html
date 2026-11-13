@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Header</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="background: transparent">
+<header class="hdr">
+<div class="hdr-in">
+<nav class="nav" aria-label="Main navigation">
+<ul>
+<sc-for list="{{items}}" as="it" hint-placeholder-count="6">
+<li><a href="{{it.href}}" aria-current="{{it.cur}}">{{it.label}}</a></li>
+</sc-for>
+</ul>
+</nav>
+<a class="prof" href="Profilo.html" aria-current="{{profCur}}" aria-label="Profile" title="Profile"><span class="av-user" aria-hidden="true"><svg viewBox="0 0 40 40" fill="currentColor"><circle cx="20" cy="15.5" r="7"></circle><path d="M5.86 34.14C8.6 28.2 13.9 25 20 25s11.4 3.2 14.14 9.14A20 20 0 0 1 5.86 34.14z"></path></svg></span></a>
+<button type="button" class="btn btn-secondary btn-sm menu-btn" aria-expanded="{{expanded}}" aria-controls="hdr-panel" onClick="{{toggle}}">
+<sc-if value="{{open}}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>Close
+</sc-if>
+<sc-if value="{{closed}}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Menu
+</sc-if>
+</button>
+</div>
+<div id="hdr-panel" class="{{panelCls}}">
+<nav aria-label="Main navigation (menu)">
+<ul>
+<sc-for list="{{items}}" as="it" hint-placeholder-count="6">
+<li><a href="{{it.href}}" aria-current="{{it.cur}}">{{it.label}}
+<sc-if value="{{it.active}}" hint-placeholder-val="{{ false }}"><svg class="check-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+</a></li>
+</sc-for>
+</ul>
+</nav>
+</div>
+</header>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["calendario","trattamenti","pannello","team","prodotti","clienti","buoni","profilo"],"default":"calendario"},"open":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":72}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'calendario';
+    const propOpen = this.props.open === true || this.props.open === 'true';
+    const open = this.state.open ?? propOpen;
+    const defs = [
+      ['calendario', 'Calendar', 'Home.dc.html'],
+      ['trattamenti', 'Treatments', 'Trattamenti.dc.html'],
+      ['pannello', 'Dashboard', 'Pannello.dc.html'],
+      ['prodotti', 'Products', 'Prodotti.dc.html'],
+      ['clienti', 'Clients', 'Clienti.dc.html'],
+      ['buoni', 'Gift vouchers', 'Buoni.dc.html']
+    ];
+    const items = defs.map(([key, label, href]) => ({
+      key, label, href, active: key === active, cur: key === active ? 'page' : undefined
+    }));
+    return {
+      items,
+      open,
+      closed: !open,
+      expanded: open ? 'true' : 'false',
+      panelCls: 'hdr-panel' + (open ? ' is-open' : ''),
+      profCur: active === 'profilo' ? 'page' : undefined,
+      toggle: () => this.setState({ open: !open })
+    };
+  }
+}
+</script>
+</body>
+</html>

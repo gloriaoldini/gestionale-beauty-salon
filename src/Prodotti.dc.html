@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Products</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="prodotti" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Products</h1>
+<p class="t-muted" style="max-width: 640px">The creams sold at the salon. Record a sale in one click: stock and the Dashboard takings update by themselves.</p>
+</div>
+<button type="button" class="btn btn-primary btn-lg" onClick="{{openNew}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New product</button>
+</div>
+
+<p class="t-label t-muted" style="margin-bottom: 12px" aria-live="polite">{{countLbl}}</p>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="card"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><rect x="12" y="16" width="24" height="26" rx="5"></rect><path d="M17 16v-5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"></path></svg></span><h2 class="t-h3">No products yet</h2><p class="t-muted">Add the creams you sell at the salon with price and stock. Sales will show in the Dashboard takings.</p><div class="first-acts"><button type="button" class="btn btn-primary" onClick="{{openNew}}">Add the first product</button></div></div></div></sc-if>
+<ul class="prod-grid">
+<sc-for list="{{products}}" as="p" hint-placeholder-count="3">
+<li class="pcard">
+<div class="pimg" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="12" y="16" width="24" height="26" rx="5"></rect><path d="M17 16v-5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"></path><path d="M18 28h12"></path></svg>PHOTO</div>
+<div class="pbody">
+<div><h2 class="t-h3">{{p.name}}</h2><p class="t-small t-muted" style="margin-top: 4px">{{p.desc}}</p></div>
+<div class="pmeta"><p class="pprice">{{p.priceLbl}}</p><span class="t-small t-muted">{{p.size}}</span></div>
+<div class="stock">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="t-small" style="font-weight: 600" id="{{p.lblId}}">In stock</span>
+<div class="stepper" role="group" aria-labelledby="{{p.lblId}}">
+<button type="button" aria-label="{{p.lMinus}}" onClick="{{p.minus}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<output aria-live="polite">{{p.stock}}</output>
+<button type="button" aria-label="{{p.lPlus}}" onClick="{{p.plus}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</div>
+<sc-if value="{{p.hasTag}}" hint-placeholder-val="{{ false }}"><span class="{{p.tagCls}}"><span class="dot"></span>{{p.tag}}</span></sc-if>
+</div>
+<div class="pacts">
+<button type="button" class="btn btn-primary btn-sm" aria-label="{{p.lSell}}" disabled="{{p.soldOut}}" onClick="{{p.sell}}">Record sale</button>
+<button type="button" class="btn btn-secondary btn-sm" aria-label="{{p.lEdit}}" onClick="{{p.edit}}">Edit</button>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{p.lDel}}" onClick="{{p.del}}">Delete</button>
+</div>
+</div>
+</li>
+</sc-for>
+</ul>
+</main>
+
+<sc-if value="{{mEdit}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="pe-t" onSubmit="{{save}}" novalidate>
+<div class="modal-hd"><h2 id="pe-t" class="t-h3">{{f.title}}</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="field"><label for="pe-name">Product name</label><input id="pe-name" class="{{f.nameCls}}" type="text" placeholder="E.g. Hydrating face cream" value="{{f.name}}" onInput="{{f.setName}}">
+<sc-if value="{{f.errName}}" hint-placeholder-val="{{ false }}"><span class="err">Write the product name</span></sc-if></div>
+<div class="field"><label for="pe-desc">Short description <span class="lbl-sub">(optional)</span></label><input id="pe-desc" class="input" type="text" placeholder="E.g. For dry skin" value="{{f.desc}}" onInput="{{f.setDesc}}"></div>
+<div class="row3">
+<div class="field"><label for="pe-size">Size</label><input id="pe-size" class="input" type="text" placeholder="E.g. 50 ml" value="{{f.size}}" onInput="{{f.setSize}}"></div>
+<div class="field"><label for="pe-price">Price</label><div class="price-in"><span aria-hidden="true">€</span><input id="pe-price" class="{{f.priceCls}}" type="text" inputmode="decimal" placeholder="0" value="{{f.price}}" onInput="{{f.setPrice}}"></div></div>
+<div class="field"><label for="pe-stock">Stock</label><input id="pe-stock" class="input" type="text" inputmode="numeric" placeholder="0" value="{{f.stock}}" onInput="{{f.setStock}}"></div>
+</div>
+<sc-if value="{{f.errPrice}}" hint-placeholder-val="{{ false }}"><span class="err">Enter a valid price</span></sc-if>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{save}}" class="btn btn-primary">{{f.saveLbl}}</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mSell}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="ps-t" onSubmit="{{confirmSell}}" novalidate>
+<div class="modal-hd"><h2 id="ps-t" class="t-h3">Record sale</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="sell-sum"><span class="sell-ic" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><rect x="12" y="16" width="24" height="26" rx="5"></rect><path d="M17 16v-5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"></path></svg></span><span style="flex: 1; min-width: 0"><b>{{sp.name}}</b><small>{{sp.size}} · 1 item</small></span><span class="pprice" style="font-size: 28px">{{sp.priceLbl}}</span></div>
+<div class="field">
+<label for="ps-q">Client <span class="lbl-sub">(optional)</span></label>
+<sc-if value="{{noPick}}" hint-placeholder-val="{{ true }}">
+<div class="cbx">
+<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input id="ps-q" class="input" type="text" autocomplete="off" placeholder="Search by name or mobile" value="{{sq}}" onInput="{{setSq}}" role="combobox" aria-expanded="{{cbxOpenS}}" aria-controls="ps-list" aria-describedby="ps-h"></div>
+<sc-if value="{{cbxOpen}}" hint-placeholder-val="{{ false }}">
+<ul id="ps-list" class="cbx-list" role="listbox" aria-label="Clients">
+<sc-for list="{{matches}}" as="c" hint-placeholder-count="3"><li role="none"><button type="button" role="option" aria-selected="false" class="cbx-opt" onClick="{{c.pick}}"><span class="av av-sm bg-neutral" aria-hidden="true">{{c.ini}}</span><span>{{c.name}}<small>{{c.tel}}</small></span></button></li></sc-for>
+<sc-if value="{{noMatch}}" hint-placeholder-val="{{ false }}"><li role="none" class="t-small t-muted" style="padding: 12px">No client found. You can record the sale without one.</li></sc-if>
+</ul>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{hasPick}}" hint-placeholder-val="{{ false }}"><div class="picked"><span class="av av-sm bg-neutral" aria-hidden="true">{{pk.ini}}</span><span class="info"><b>{{pk.name}}</b><small>{{pk.tel}}</small></span><button type="button" class="btn btn-ghost btn-sm" onClick="{{unpick}}">Change</button></div></sc-if>
+<span id="ps-h" class="hint">If you pick her, the sale also shows in her profile.</span>
+</div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{confirmSell}}" class="btn btn-primary">Record sale</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mDel}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="pd-t" aria-describedby="pd-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="pd-t" class="t-h3" style="padding-top: 10px">Delete “{{t.name}}”?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="pd-d" style="color: #4F4446">It will no longer show among the products for sale.</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmDel}}">Delete</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toastOn}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status" aria-live="polite">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+<span class="tmsg">{{toastMsg}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-sm" onClick="{{undo}}">Undo</button></sc-if>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"modal":{"editor":"enum","options":["none","edit","sell"],"default":"none"},"$preview":{"width":1440,"height":1100}}'>
+const PRODUCTS0 = [
+  { id: 'p1', name: 'Hydrating face cream', desc: 'For dry and sensitive skin, for daily use', size: '50 ml', price: 32, stock: 12 },
+  { id: 'p2', name: 'Nourishing body cream', desc: 'Rich texture, ideal after a scrub', size: '200 ml', price: 28, stock: 3 },
+  { id: 'p3', name: 'Repairing hand cream', desc: 'Absorbs quickly, not greasy', size: '75 ml', price: 14, stock: 20 }
+];
+const TODAY = 3; // giovedì 12 novembre 2026
+const nowLbl = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+// Vendite di esempio: [giorno, ora, id prodotto, cliente] · giorno 0 = lunedì 9 novembre 2026
+const SALES0 = [
+  [-44, '10:00', 'p1', 'Anna Galli'], [-39, '16:20', 'p3', 'Vera Longhi'], [-34, '11:45', 'p2', 'Clara Doni'],
+  [-7, '11:15', 'p2', 'Marta Rossetti'], [-6, '17:00', 'p1', 'Sara Bassi'], [-4, '10:40', 'p3', 'Silvia Moro'], [-3, '12:30', 'p1', 'Laura Pini'], [-2, '15:10', 'p2', 'Giada Fumi'],
+  [0, '10:20', 'p1', 'Anna Galli'], [0, '16:05', 'p3', 'Paola Riccio'], [1, '12:10', 'p2', 'Ada Pozzi'], [2, '09:50', 'p1', 'Alice Rota'], [2, '11:30', 'p3', 'Elena Gori'], [2, '15:40', 'p3', ''], [3, '09:45', 'p1', 'Pia Marchi']
+].map((x, i) => { const p = PRODUCTS0.find((q) => q.id === x[2]); return { id: 's' + (i + 1), day: x[0], time: x[1], pid: p.id, name: p.name, price: p.price, client: x[3] }; });
+// Stessa rubrica della pagina Clienti
+const CL_NAMES = ['Anna Galli', 'Sara Bassi', 'Elisa Monti', 'Laura Pini', 'Marta Rossetti', 'Giada Fumi', 'Paola Riccio', 'Irma Basile', 'Silvia Moro', 'Clara Doni', 'Vera Longhi', 'Rita Sala', 'Ada Pozzi', 'Nora Ghidi', 'Alice Rota', 'Bice Ferro', 'Elena Gori', 'Dora Vitali', 'Ines Carli', 'Lia Bruni', 'Pia Marchi', 'Olga Brera', 'Tea Ferrante', 'Gaia Orsi', 'Sofia Lodi', 'Rosa Bassani', 'Carla Duse', 'Dafne Mori', 'Lisa Esposti', 'Ada Volpe', 'Nadia Cerri', 'Livia Peri', 'Cora Landi', 'Marta Zeni', 'Viola Arno', 'Arianna Pace', 'Irene Vigo', 'Aurora Tosi', 'Bea Lanza'];
+const CLIENTS0 = CL_NAMES.map((n, i) => { const p = n.split(' '); return { id: 'c' + (i + 1), nome: p[0], cognome: p.slice(1).join(' '), tel: '+39 300 000 ' + String(101 + i).padStart(4, '0') }; });
+const initials = (n) => n.split(' ').map((w) => w[0] || '').join('').slice(0, 2).toUpperCase();
+const fmtPrice = (p) => '€ ' + String(p).replace('.', ',');
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient', 'products', 'vouchers', 'sales'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  toast(msg, undo) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({ toast: { msg, undo: undo || null } });
+    this._t = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  blank() { return { id: null, name: '', desc: '', size: '', price: '', stock: '0', err: {} }; }
+  curForm() { return this.state.form || this.blank(); }
+  setF(p) { this.setState({ form: { ...this.curForm(), ...p } }); }
+  renderVals() {
+    const products = this.state.products ?? PRODUCTS0;
+    const modal = this.state.modal ?? (this.props.modal || 'none');
+    const t = products.find((p) => p.id === this.state.target) || products[0] || { name: '' };
+    const set = (id, patch) => products.map((p) => (p.id === id ? { ...p, ...patch } : p));
+    const close = () => this.setState({ modal: 'none', form: null, sPick: null, sq: '' });
+    const fm = this.curForm();
+    const e = fm.err || {};
+    const tt = this.state.toast || null;
+    // Vendita: scelta della cliente (facoltativa)
+    const clients = this.state.clients ?? CLIENTS0;
+    const cname = (c) => (c.nome + ' ' + (c.cognome || '')).trim();
+    const sq = (this.state.sq || '').trim().toLowerCase();
+    const sp = products.find((p) => p.id === this.state.target) || products[0] || { name: '', size: '', price: 0 };
+    const pk = clients.find((c) => c.id === this.state.sPick) || null;
+    const matches = sq ? clients.filter((c) => cname(c).toLowerCase().includes(sq) || (c.tel || '').replace(/\s/g, '').includes(sq.replace(/\s/g, ''))).slice(0, 6) : [];
+    return {
+      none: products.length === 0, some: products.length > 0,
+      countLbl: products.length === 1 ? '1 product' : products.length + ' products',
+      products: products.map((p) => {
+        const low = p.stock > 0 && p.stock <= 3;
+        const out = p.stock <= 0;
+        return {
+          ...p,
+          priceLbl: fmtPrice(p.price),
+          lblId: 'st-' + p.id,
+          hasTag: low || out,
+          tag: out ? 'Sold out' : 'Running low',
+          tagCls: 'tag ' + (out ? 'tag-danger' : 'tag-warn'),
+          soldOut: out,
+          lMinus: 'Remove one item of ' + p.name, lPlus: 'Add one item of ' + p.name,
+          lSell: 'Record sale of ' + p.name, lEdit: 'Edit ' + p.name, lDel: 'Delete ' + p.name,
+          minus: () => this.setState({ products: set(p.id, { stock: Math.max(0, p.stock - 1) }) }),
+          plus: () => this.setState({ products: set(p.id, { stock: p.stock + 1 }) }),
+          sell: () => { if (p.stock > 0) this.setState({ modal: 'sell', target: p.id, sq: '', sPick: null }); },
+          edit: () => this.setState({ modal: 'edit', form: { id: p.id, name: p.name, desc: p.desc, size: p.size, price: String(p.price).replace('.', ','), stock: String(p.stock), err: {} } }),
+          del: () => this.setState({ modal: 'delete', target: p.id })
+        };
+      }),
+      t,
+      mEdit: modal === 'edit',
+      mSell: modal === 'sell',
+      sp: { ...sp, priceLbl: fmtPrice(sp.price) },
+      sq: this.state.sq || '',
+      setSq: (ev) => this.setState({ sq: ev.target.value }),
+      cbxOpen: !pk && sq.length > 0, cbxOpenS: !pk && sq.length > 0 ? 'true' : 'false',
+      matches: matches.map((c) => ({ name: cname(c), tel: c.tel || '', ini: initials(cname(c)), pick: () => this.setState({ sPick: c.id, sq: '' }) })),
+      noMatch: sq.length > 0 && matches.length === 0,
+      noPick: !pk, hasPick: !!pk,
+      pk: pk ? { name: cname(pk), tel: pk.tel || '', ini: initials(cname(pk)) } : { name: '', tel: '', ini: '' },
+      unpick: () => this.setState({ sPick: null }),
+      confirmSell: (ev) => {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        if (sp.stock <= 0) return;
+        const sales = this.state.sales ?? SALES0;
+        const who = pk ? cname(pk) : '';
+        this.setState({ modal: 'none', sPick: null, sq: '', products: set(sp.id, { stock: sp.stock - 1 }), sales: [...sales, { id: 's' + Date.now(), day: TODAY, time: nowLbl(), pid: sp.id, name: sp.name, price: sp.price, client: who }] });
+        this.toast('Sale recorded · ' + sp.name + ' · ' + fmtPrice(sp.price) + (who ? ' · ' + who : ''), { products, sales });
+      },
+      mDel: modal === 'delete',
+      close,
+      onKey: (ev) => { if (ev.key === 'Escape') close(); },
+      openNew: () => this.setState({ modal: 'edit', form: this.blank() }),
+      f: {
+        ...fm,
+        title: fm.id ? 'Edit product' : 'New product',
+        saveLbl: fm.id ? 'Save changes' : 'Add product',
+        setName: (ev) => this.setF({ name: ev.target.value }),
+        setDesc: (ev) => this.setF({ desc: ev.target.value }),
+        setSize: (ev) => this.setF({ size: ev.target.value }),
+        setPrice: (ev) => this.setF({ price: ev.target.value }),
+        setStock: (ev) => this.setF({ stock: ev.target.value }),
+        errName: !!e.name, errPrice: !!e.price,
+        nameCls: 'input' + (e.name ? ' is-error' : ''),
+        priceCls: 'input' + (e.price ? ' is-error' : '')
+      },
+      save: (ev) => {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        const cur = this.curForm();
+        const price = Number(String(cur.price).replace(',', '.'));
+        const stock = Math.max(0, parseInt(cur.stock, 10) || 0);
+        const err = {};
+        if (!cur.name.trim()) err.name = 1;
+        if (cur.price === '' || isNaN(price) || price < 0) err.price = 1;
+        if (Object.keys(err).length) { this.setF({ err }); return; }
+        const item = { id: cur.id || ('p' + Date.now()), name: cur.name.trim(), desc: cur.desc.trim(), size: cur.size.trim(), price, stock };
+        const next = cur.id ? products.map((p) => (p.id === cur.id ? item : p)) : [...products, item];
+        this.setState({ products: next, modal: 'none', form: null });
+        this.toast(cur.id ? 'Product updated' : 'Product added · ' + item.name);
+      },
+      confirmDel: () => { this.setState({ products: products.filter((p) => p.id !== t.id), modal: 'none' }); this.toast('Product deleted · ' + t.name, products); },
+      toastOn: !!tt, toastMsg: tt ? tt.msg : '', toastUndo: !!(tt && tt.undo),
+      undo: () => { if (tt && tt.undo) this.setState(Array.isArray(tt.undo) ? { products: tt.undo, toast: null } : { ...tt.undo, toast: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Team</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="profilo" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<a class="link" href="Profilo.html" style="font-size: 15px; align-self: flex-start"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Profile</a>
+<h1 class="serif t-h1">Team</h1>
+<p class="t-muted" style="max-width: 640px">The salon’s staff. Each has a colour, which you’ll see in the calendar and in the filters.</p>
+</div>
+<button type="button" class="btn btn-primary btn-lg" onClick="{{openAdd}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg>Add staff member</button>
+</div>
+
+<p class="t-label t-muted" style="margin-bottom: 12px" aria-live="polite">{{countLbl}}</p>
+<ul class="team-cards">
+<sc-for list="{{members}}" as="m" hint-placeholder-count="5">
+<li class="{{m.cardCls}}">
+<div class="tcard-hd">
+<span class="{{m.avCls}}" aria-hidden="true">{{m.ini}}</span>
+<div style="min-width: 0">
+<p class="t-h3" style="font-size: 18px">{{m.full}}</p>
+<p class="color-lbl"><span class="{{m.dotCls}}" aria-hidden="true"></span>Colour: {{m.colorName}}</p>
+</div>
+</div>
+<div><span class="{{m.stCls}}"><span class="dot"></span>{{m.status}}</span></div>
+<div class="acts">
+<button type="button" class="btn btn-secondary btn-sm" aria-label="{{m.lEdit}}" onClick="{{m.edit}}">Edit</button>
+<sc-if value="{{m.isActive}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost btn-sm" aria-label="{{m.lDeact}}" onClick="{{m.deact}}">Deactivate</button></sc-if>
+<sc-if value="{{m.isOff}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost btn-sm" aria-label="{{m.lReact}}" onClick="{{m.react}}">Reactivate</button></sc-if>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{m.lRemove}}" onClick="{{m.remove}}">Remove</button>
+</div>
+</li>
+</sc-for>
+</ul>
+<p class="t-small t-muted" style="margin-top: 16px">The manager is used from one computer with a single sign-in: no invites or roles needed here.</p>
+</main>
+
+<sc-if value="{{mForm}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="tf-t" onSubmit="{{save}}" novalidate>
+<div class="modal-hd"><h2 id="tf-t" class="t-h3">{{f.title}}</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="row2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)">
+<div class="field"><label for="tf-nome">First name</label><input id="tf-nome" class="{{f.nomeCls}}" type="text" autocomplete="off" value="{{f.nome}}" onInput="{{f.setNome}}">
+<sc-if value="{{f.errNome}}" hint-placeholder-val="{{ false }}"><span class="err">Write the first name</span></sc-if></div>
+<div class="field"><label for="tf-cognome">Last name <span class="lbl-sub">(optional)</span></label><input id="tf-cognome" class="input" type="text" autocomplete="off" value="{{f.cognome}}" onInput="{{f.setCognome}}"></div>
+</div>
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend class="lbl" style="margin-bottom: 8px">Colour in the calendar</legend>
+<div class="swatches" role="radiogroup" aria-label="Colour in the calendar">
+<sc-for list="{{f.colors}}" as="c" hint-placeholder-count="6"><button type="button" role="radio" class="sw-opt" aria-checked="{{c.checked}}" aria-label="{{c.aria}}" disabled="{{c.used}}" onClick="{{c.pick}}"><i class="{{c.cls}}"></i></button></sc-for>
+</div>
+<p class="hint" style="margin-top: 6px">Colours already used by another staff member can’t be picked.</p>
+</fieldset>
+<div>
+<p class="lbl" style="margin-bottom: 8px">Calendar preview</p>
+<div class="{{f.prevCls}}" style="position: relative; width: 220px; height: 72px; cursor: default"><span class="ah"><span class="{{f.iniCls}}" aria-hidden="true">{{f.ini}}</span>10:00 – 11:00</span><span class="nm">Client name</span><span class="tr">Treatment</span></div>
+</div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{save}}" class="btn btn-primary">{{f.saveLbl}}</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mDeact}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="md-t" aria-describedby="md-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FCF0DC; color: #8A5300" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M8 12h8"></path></svg></span>
+<h2 id="md-t" class="t-h3" style="padding-top: 10px">Deactivate {{t.full}}?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="md-d" style="color: #4F4446">She will no longer show among the staff when you add an appointment. You can reactivate her any time.</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-primary" onClick="{{confirmDeact}}">Deactivate</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{mRemove}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="mx-t" aria-describedby="mx-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="mx-t" class="t-h3" style="padding-top: 10px">Remove {{t.full}} from the team?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd">
+<p id="mx-d" style="color: #4F4446">She will no longer show among the staff. This can’t be undone.</p>
+<sc-if value="{{tActive}}" hint-placeholder-val="{{ true }}">
+<div style="background: #FDF3F5; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between">
+<span class="t-small">Might she come back? You can deactivate her instead.</span>
+<button type="button" class="btn btn-ghost btn-sm" onClick="{{switchToDeact}}">Deactivate instead</button>
+</div>
+</sc-if>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmRemove}}">Remove from team</button></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"modal":{"editor":"enum","options":["none","add","edit","deactivate","remove"],"default":"none"},"target":{"editor":"enum","options":["b","c","m","n","i"],"default":"n"},"$preview":{"width":1440,"height":1000}}'>
+const COLORS = [
+  { c: 'c1', name: 'purple' }, { c: 'c2', name: 'teal' }, { c: 'c3', name: 'amber' },
+  { c: 'c4', name: 'blue' }, { c: 'c5', name: 'green' }, { c: 'c6', name: 'custom' }
+];
+const MEMBERS = [
+  { id: 'b', nome: 'Bianca', cognome: 'Neri', c: 'c1', active: true },
+  { id: 'c', nome: 'Chiara', cognome: 'Ferri', c: 'c2', active: true },
+  { id: 'm', nome: 'Martina', cognome: 'Sole', c: 'c3', active: true },
+  { id: 'n', nome: 'Noemi', cognome: 'Riva', c: 'c4', active: true },
+  { id: 'i', nome: 'Irene', cognome: 'Valli', c: 'c5', active: false }
+];
+const full = (m) => (m.nome + ' ' + (m.cognome || '')).trim();
+const ini = (m) => ((m.nome || '?')[0] + ((m.cognome || '')[0] || '')).toUpperCase();
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+// Colore personalizzato (sesto colore): scelto con il selettore, vale in tutte le pagine
+function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  curForm(members) {
+    if (this.state.form) return this.state.form;
+    if ((this.props.modal || 'none') === 'edit') {
+      const m = members.find((x) => x.id === (this.props.target || 'n'));
+      if (m) return { id: m.id, nome: m.nome, cognome: m.cognome, c: m.c, err: {} };
+    }
+    const used = members.map((x) => x.c);
+    const free = COLORS.find((x) => !used.includes(x.c));
+    return { id: null, nome: '', cognome: '', c: free ? free.c : 'c1', err: {} };
+  }
+  renderVals() {
+    const members = this.state.members ?? MEMBERS;
+    const modal = this.state.modal ?? (this.props.modal || 'none');
+    const tid = this.state.target ?? (this.props.target || 'n');
+    const t = members.find((x) => x.id === tid) || members[0];
+    const close = () => this.setState({ modal: 'none', form: null });
+    const fm = this.curForm(members);
+    const setF = (p) => this.setState({ form: { ...this.curForm(members), ...p } });
+    const usedByOthers = members.filter((x) => x.id !== fm.id).map((x) => x.c);
+    const activeCount = members.filter((x) => x.active).length;
+    return {
+      countLbl: activeCount + (activeCount === 1 ? ' active staff member' : ' active staff members') + (members.length > activeCount ? ' · ' + (members.length - activeCount) + ' deactivated' : ''),
+      members: members.map((m) => {
+        const col = COLORS.find((x) => x.c === m.c) || COLORS[0];
+        return {
+          ...m, full: full(m), ini: ini(m), colorName: col.name,
+          cardCls: 'tcard' + (m.active ? '' : ' is-off'),
+          avCls: 'av bg-' + m.c, dotCls: 'gsel-dot bg-' + m.c,
+          status: m.active ? 'Active' : 'Deactivated',
+          stCls: 'tag ' + (m.active ? 'tag-ok' : 'tag-neutral'),
+          isActive: m.active, isOff: !m.active,
+          lEdit: 'Edit ' + full(m), lDeact: 'Deactivate ' + full(m), lReact: 'Reactivate ' + full(m), lRemove: 'Remove ' + full(m),
+          edit: () => this.setState({ modal: 'edit', form: { id: m.id, nome: m.nome, cognome: m.cognome, c: m.c, err: {} } }),
+          deact: () => this.setState({ modal: 'deactivate', target: m.id }),
+          react: () => this.setState({ members: members.map((x) => (x.id === m.id ? { ...x, active: true } : x)) }),
+          remove: () => this.setState({ modal: 'remove', target: m.id })
+        };
+      }),
+      t: { full: full(t) },
+      tActive: !!t.active,
+      mForm: modal === 'add' || modal === 'edit',
+      mDeact: modal === 'deactivate',
+      mRemove: modal === 'remove',
+      close,
+      onKey: (e) => { if (e.key === 'Escape') close(); },
+      openAdd: () => this.setState({ modal: 'add', form: null }),
+      f: {
+        ...fm,
+        title: fm.id ? 'Edit staff member' : 'Add staff member',
+        saveLbl: fm.id ? 'Save changes' : 'Add',
+        setNome: (e) => setF({ nome: e.target.value }),
+        setCognome: (e) => setF({ cognome: e.target.value }),
+        errNome: !!fm.err.nome,
+        nomeCls: 'input' + (fm.err.nome ? ' is-error' : ''),
+        ini: ini(fm),
+        iniCls: 'ini bg-' + fm.c,
+        prevCls: 'appt ' + fm.c,
+        colors: COLORS.map((x) => ({
+          cls: 'bg-' + x.c, checked: x.c === fm.c ? 'true' : 'false',
+          used: usedByOthers.includes(x.c),
+          aria: cap(x.name) + (usedByOthers.includes(x.c) ? ', already used' : ''),
+          pick: () => setF({ c: x.c })
+        }))
+      },
+      save: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const cur = this.curForm(members);
+        if (!cur.nome.trim()) { setF({ err: { nome: 1 } }); return; }
+        const item = { id: cur.id || ('o' + Date.now()), nome: cur.nome.trim(), cognome: (cur.cognome || '').trim(), c: cur.c, active: true };
+        const next = cur.id ? members.map((x) => (x.id === cur.id ? { ...x, ...item, active: x.active } : x)) : [...members, item];
+        this.setState({ members: next, modal: 'none', form: null });
+      },
+      confirmDeact: () => this.setState({ members: members.map((x) => (x.id === t.id ? { ...x, active: false } : x)), modal: 'none' }),
+      switchToDeact: () => this.setState({ modal: 'deactivate' }),
+      confirmRemove: () => this.setState({ members: members.filter((x) => x.id !== t.id), modal: 'none' })
+    };
+  }
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+</script>
+</body>
+</html>

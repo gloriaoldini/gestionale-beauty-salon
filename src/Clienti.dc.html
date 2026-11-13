@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Clients</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="clienti" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Clients</h1>
+<p class="t-muted" style="max-width: 640px">The salon’s address book. Clients saved here show up right away when you add an appointment.</p>
+</div>
+<button type="button" class="btn btn-primary btn-lg" onClick="{{openNew}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg>New client</button>
+</div>
+
+<div class="toolbar">
+<div class="search">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<label for="cl-q" class="sr">Search client</label>
+<input id="cl-q" class="input" type="search" placeholder="Search by name, phone or email" value="{{q}}" onInput="{{setQ}}">
+</div>
+<p class="t-label t-muted" aria-live="polite">{{countLbl}}</p>
+</div>
+
+<div class="tbl-wrap">
+<table class="tbl">
+<thead><tr><th scope="col">Client</th><th scope="col">Mobile</th><th scope="col">Email</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+<tbody>
+<sc-for list="{{rows}}" as="c" hint-placeholder-count="10">
+<tr class="svc">
+<td><div class="who"><span class="av av-sm bg-neutral" aria-hidden="true">{{c.ini}}</span><span><a class="who-name" href="ClienteScheda.html" onClick="{{c.open}}" style="color: #2A2325; text-decoration: underline; text-underline-offset: 3px">{{c.full}}</a><sc-if value="{{c.hasNote}}" hint-placeholder-val="{{ false }}"><span class="cnote-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg><span class="sr">Client note: </span>{{c.note}}</span></sc-if></span></div></td>
+<td><a class="ct" href="{{c.telHref}}">{{c.tel}}</a></td>
+<td>
+<sc-if value="{{c.hasEmail}}" hint-placeholder-val="{{ true }}"><a class="ct" href="{{c.mailHref}}">{{c.email}}</a></sc-if>
+<sc-if value="{{c.noEmail}}" hint-placeholder-val="{{ false }}"><span class="t-muted">Not given</span></sc-if>
+</td>
+<td><div class="row-actions">
+<button type="button" class="btn btn-ghost btn-sm" aria-label="{{c.lEdit}}" onClick="{{c.edit}}">Edit</button>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{c.lDel}}" onClick="{{c.del}}">Delete</button>
+</div></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg></span><h2 class="t-h3">No clients yet</h2><p class="t-muted">Add your clients here, or create them directly when you book an appointment in the calendar.</p><div class="first-acts"><button type="button" class="btn btn-primary" onClick="{{openNew}}">Add the first client</button></div></div></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><p class="empty">No clients found. <button type="button" class="btn btn-ghost btn-sm" onClick="{{openNew}}">Add new client</button></p></sc-if>
+</div>
+
+<ul class="mcards">
+<sc-for list="{{rows}}" as="c" hint-placeholder-count="10">
+<li class="mcard">
+<div class="who"><span class="av av-sm bg-neutral" aria-hidden="true">{{c.ini}}</span><a class="who-name" href="ClienteScheda.html" onClick="{{c.open}}" style="font-size: 17px; color: #2A2325; text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center">{{c.full}}</a></div>
+<sc-if value="{{c.hasNote}}" hint-placeholder-val="{{ false }}"><div class="cnote-box"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>Client note</b><span>{{c.note}}</span></div></sc-if>
+<div>
+<a class="ct" href="{{c.telHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect><path d="M11 18h2"></path></svg>{{c.tel}}</a>
+<sc-if value="{{c.hasEmail}}" hint-placeholder-val="{{ true }}"><a class="ct" href="{{c.mailHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5l8.5 6.5 8.5-6.5"></path></svg>{{c.email}}</a></sc-if>
+</div>
+<div class="acts">
+<button type="button" class="btn btn-secondary btn-sm" aria-label="{{c.lEdit}}" onClick="{{c.edit}}">Edit</button>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{c.lDel}}" onClick="{{c.del}}">Delete</button>
+</div>
+</li>
+</sc-for>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><li class="mcard"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"></path></svg></span><h2 class="t-h3">No clients yet</h2><p class="t-muted">Add your clients here, or create them directly when you book an appointment in the calendar.</p><div class="first-acts"><button type="button" class="btn btn-primary" onClick="{{openNew}}">Add the first client</button></div></div></li></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><li class="mcard t-muted">No clients found.</li></sc-if>
+</ul>
+
+<sc-if value="{{hasMore}}" hint-placeholder-val="{{ true }}">
+<div class="more"><button type="button" class="btn btn-secondary" onClick="{{showMore}}">{{moreLbl}}</button></div>
+</sc-if>
+</main>
+
+<sc-if value="{{mEdit}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="ce-t" onSubmit="{{save}}" novalidate>
+<div class="modal-hd"><h2 id="ce-t" class="t-h3">{{f.title}}</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="row2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)">
+<div class="field"><label for="ce-nome">First name</label><input id="ce-nome" class="{{f.nomeCls}}" type="text" autocomplete="off" value="{{f.nome}}" onInput="{{f.setNome}}" aria-invalid="{{f.errNomeS}}">
+<sc-if value="{{f.errNome}}" hint-placeholder-val="{{ false }}"><span class="err">Write the first name</span></sc-if></div>
+<div class="field"><label for="ce-cognome">Last name</label><input id="ce-cognome" class="{{f.cognomeCls}}" type="text" autocomplete="off" value="{{f.cognome}}" onInput="{{f.setCognome}}" aria-invalid="{{f.errCognomeS}}">
+<sc-if value="{{f.errCognome}}" hint-placeholder-val="{{ false }}"><span class="err">Write the last name</span></sc-if></div>
+</div>
+<div class="field"><label for="ce-tel">Mobile</label><input id="ce-tel" class="{{f.telCls}}" type="tel" inputmode="tel" autocomplete="off" placeholder="+39 …" value="{{f.tel}}" onInput="{{f.setTel}}" aria-invalid="{{f.errTelS}}"></div>
+<div class="field"><label for="ce-email">Email <span class="t-muted" style="font-weight: 400">(optional)</span></label><input id="ce-email" class="{{f.emailCls}}" type="email" autocomplete="off" placeholder="name@example.com" value="{{f.email}}" onInput="{{f.setEmail}}" aria-invalid="{{f.errEmailS}}">
+<sc-if value="{{f.errEmailFmt}}" hint-placeholder-val="{{ false }}"><span class="err">Check the email: something is missing</span></sc-if></div>
+<sc-if value="{{f.errContact}}" hint-placeholder-val="{{ false }}"><span class="err">Enter at least the mobile or the email</span></sc-if>
+<div class="field"><label for="ce-note">Client note <span class="lbl-sub">· shows in every appointment of this client</span></label><textarea id="ce-note" class="{{f.noteCls}}" placeholder="E.g. latex allergy, sensitive skin…" value="{{f.note}}" onInput="{{f.setNote}}"></textarea></div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{save}}" class="btn btn-primary">{{f.saveLbl}}</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mDel}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cd-t" aria-describedby="cd-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="cd-t" class="t-h3" style="padding-top: 10px">Delete {{t.full}}?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="cd-d" style="color: #4F4446">She will no longer show in the search when you add an appointment.</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmDel}}">Delete</button></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"modal":{"editor":"enum","options":["none","edit","delete"],"default":"none"},"$preview":{"width":1440,"height":1700}}'>
+// Stesso elenco usato nel Calendario
+const CL_NAMES = ['Anna Galli', 'Sara Bassi', 'Elisa Monti', 'Laura Pini', 'Marta Rossetti', 'Giada Fumi', 'Paola Riccio', 'Irma Basile', 'Silvia Moro', 'Clara Doni', 'Vera Longhi', 'Rita Sala', 'Ada Pozzi', 'Nora Ghidi', 'Alice Rota', 'Bice Ferro', 'Elena Gori', 'Dora Vitali', 'Ines Carli', 'Lia Bruni', 'Pia Marchi', 'Olga Brera', 'Tea Ferrante', 'Gaia Orsi', 'Sofia Lodi', 'Rosa Bassani', 'Carla Duse', 'Dafne Mori', 'Lisa Esposti', 'Ada Volpe', 'Nadia Cerri', 'Livia Peri', 'Cora Landi', 'Marta Zeni', 'Viola Arno', 'Arianna Pace', 'Irene Vigo', 'Aurora Tosi', 'Bea Lanza'];
+// Note cliente: restano sempre sulla scheda e compaiono negli appuntamenti
+const CNOTES = {
+  'Anna Galli': 'Sensitive skin: avoid scented products',
+  'Silvia Moro': 'Latex allergy',
+  'Marta Rossetti': 'Prefers light pressure',
+  'Nora Ghidi': 'Usually arrives 10 minutes early',
+  'Carla Duse': 'Lower back discomfort',
+  'Pia Marchi': 'Nickel allergy',
+  'Gaia Orsi': 'Prefers quiet music'
+};
+const CLIENTS0 = CL_NAMES.map((n, i) => {
+  const p = n.split(' ');
+  return {
+    id: 'c' + (i + 1), nome: p[0], cognome: p.slice(1).join(' '),
+    tel: '+39 300 000 ' + String(101 + i).padStart(4, '0'),
+    email: i % 7 === 3 ? '' : (p[0] + '.' + p.slice(1).join('')).toLowerCase() + '@mail.demo',
+    note: CNOTES[n] || ''
+  };
+});
+const PAGE = 20;
+const initials = (a, b) => ((a || '')[0] || '').toUpperCase() + ((b || '')[0] || '').toUpperCase();
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  blank() { return { id: null, nome: '', cognome: '', tel: '', email: '', note: '', err: {} }; }
+  curForm() { return this.state.form || this.blank(); }
+  setF(p) { this.setState({ form: { ...this.curForm(), ...p } }); }
+  renderVals() {
+    const clients = this.state.clients ?? CLIENTS0;
+    const q = this.state.q ?? '';
+    const limit = this.state.limit ?? PAGE;
+    const modal = this.state.modal ?? (this.props.modal || 'none');
+    const tid = this.state.target ?? 'c36';
+    const ql = q.trim().toLowerCase();
+    const qd = ql.replace(/\s/g, '');
+    const sorted = clients.slice().sort((a, b) => (a.cognome + ' ' + a.nome).localeCompare(b.cognome + ' ' + b.nome, 'it'));
+    const found = sorted.filter((c) => !ql
+      || (c.nome + ' ' + c.cognome).toLowerCase().includes(ql)
+      || (c.cognome + ' ' + c.nome).toLowerCase().includes(ql)
+      || (c.email && c.email.toLowerCase().includes(ql))
+      || (qd && c.tel.replace(/\s/g, '').includes(qd)));
+    const view = (c) => ({
+      ...c,
+      full: c.nome + ' ' + c.cognome,
+      ini: initials(c.nome, c.cognome),
+      telHref: 'tel:' + c.tel.replace(/\s/g, ''),
+      mailHref: 'mailto:' + c.email,
+      hasEmail: !!c.email, noEmail: !c.email,
+      hasNote: !!c.note,
+      open: () => this.setState({ selClient: c.id }),
+      lEdit: 'Edit ' + c.nome + ' ' + c.cognome,
+      lDel: 'Delete ' + c.nome + ' ' + c.cognome,
+      edit: () => this.setState({ modal: 'edit', form: { ...c, err: {} } }),
+      del: () => this.setState({ modal: 'delete', target: c.id })
+    });
+    const rows = found.slice(0, limit).map(view);
+    const rest = found.length - rows.length;
+    const tRaw = clients.find((c) => c.id === tid) || clients[0];
+    const fm = this.curForm();
+    const e = fm.err || {};
+    const close = () => this.setState({ modal: 'none', form: null });
+    return {
+      q,
+      setQ: (ev) => this.setState({ q: ev.target.value, limit: PAGE }),
+      countLbl: found.length === 1 ? '1 client' : found.length + ' clients',
+      rows,
+      isEmpty: found.length === 0,
+      none: sorted.length === 0, isEmptySearch: found.length === 0 && sorted.length > 0,
+      hasMore: rest > 0,
+      moreLbl: 'Show more ' + rest,
+      showMore: () => this.setState({ limit: limit + PAGE }),
+      t: tRaw ? view(tRaw) : { full: '' },
+      mEdit: modal === 'edit',
+      mDel: modal === 'delete',
+      close,
+      onKey: (ev) => { if (ev.key === 'Escape') close(); },
+      openNew: () => this.setState({ modal: 'edit', form: this.blank() }),
+      f: {
+        ...fm,
+        title: fm.id ? 'Edit client' : 'New client',
+        saveLbl: fm.id ? 'Save changes' : 'Add client',
+        setNome: (ev) => this.setF({ nome: ev.target.value }),
+        setCognome: (ev) => this.setF({ cognome: ev.target.value }),
+        setTel: (ev) => this.setF({ tel: ev.target.value }),
+        setEmail: (ev) => this.setF({ email: ev.target.value }),
+        note: fm.note || '',
+        setNote: (ev) => this.setF({ note: ev.target.value }),
+        noteCls: 'textarea' + (fm.note ? ' is-cnote' : ''),
+        errNome: !!e.nome, errCognome: !!e.cognome, errEmailFmt: !!e.emailFmt, errContact: !!e.contact,
+        errNomeS: e.nome ? 'true' : 'false', errCognomeS: e.cognome ? 'true' : 'false',
+        errTelS: e.contact ? 'true' : 'false', errEmailS: (e.emailFmt || e.contact) ? 'true' : 'false',
+        nomeCls: 'input' + (e.nome ? ' is-error' : ''),
+        cognomeCls: 'input' + (e.cognome ? ' is-error' : ''),
+        telCls: 'input' + (e.contact ? ' is-error' : ''),
+        emailCls: 'input' + ((e.emailFmt || e.contact) ? ' is-error' : '')
+      },
+      save: (ev) => {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        const cur = this.curForm();
+        const n = { nome: cur.nome.trim(), cognome: cur.cognome.trim(), tel: cur.tel.trim(), email: cur.email.trim(), note: (cur.note || '').trim() };
+        const err = {};
+        if (!n.nome) err.nome = 1;
+        if (!n.cognome) err.cognome = 1;
+        if (!n.tel && !n.email) err.contact = 1;
+        if (n.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n.email)) err.emailFmt = 1;
+        if (Object.keys(err).length) { this.setF({ err }); return; }
+        const item = { id: cur.id || ('c' + Date.now()), ...n };
+        const next = cur.id ? clients.map((c) => (c.id === cur.id ? item : c)) : [...clients, item];
+        this.setState({ clients: next, modal: 'none', form: null, q: cur.id ? q : '' });
+      },
+      confirmDel: () => this.setState({ clients: clients.filter((c) => c.id !== tid), modal: 'none' })
+    };
+  }
+}
+</script>
+</body>
+</html>

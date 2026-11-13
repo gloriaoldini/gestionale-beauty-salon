@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gift vouchers</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="buoni" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Gift vouchers</h1>
+<p class="t-muted" style="max-width: 640px">Create a voucher, hand over the code and mark it as used when the client comes in.</p>
+</div>
+<button type="button" class="btn btn-primary btn-lg" onClick="{{openNew}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13M12 8c-1.5-3-5-3.5-5-1s3 1 5 1c2 0 5 1.5 5-1s-3.5-2-5 1"></path></svg>New voucher</button>
+</div>
+
+<div class="v-sum">
+<section class="card kpi" aria-labelledby="vs1"><h2 id="vs1" class="t-over">Valid vouchers</h2><p class="num" style="font-size: 44px">{{nActive}}</p><p class="sub">still to use</p></section>
+<section class="card kpi" aria-labelledby="vs2"><h2 id="vs2" class="t-over">Value of valid vouchers in €</h2><p class="num" style="font-size: 44px">{{activeValue}}</p><p class="sub">treatment prices</p></section>
+<section class="card kpi" aria-labelledby="vs3"><h2 id="vs3" class="t-over">Used</h2><p class="num" style="font-size: 44px">{{nUsed}}</p><p class="sub">{{nExpired}} expired</p></section>
+</div>
+
+<div class="toolbar">
+<div class="search">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<label for="v-q" class="sr">Search voucher</label>
+<input id="v-q" class="input" type="search" placeholder="Search by code or name" value="{{q}}" onInput="{{setQ}}">
+</div>
+<div class="pills" role="group" aria-label="Filter by status">
+<sc-for list="{{filters}}" as="p" hint-placeholder-count="4"><button type="button" class="pill" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+</div>
+
+<div class="tbl-wrap">
+<table class="tbl">
+<thead><tr><th scope="col">Code</th><th scope="col">Value</th><th scope="col">For</th><th scope="col">Bought by</th><th scope="col">Expiry</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+<tbody>
+<sc-for list="{{rows}}" as="v" hint-placeholder-count="4">
+<tr class="svc">
+<td><span class="code">{{v.code}}</span></td>
+<td><b style="font-weight: 600">{{v.valueLbl}}</b></td>
+<td>{{v.to}}</td>
+<td>{{v.from}}<span class="t-small t-muted" style="display: block">on {{v.createdLbl}}</span></td>
+<td>{{v.expLbl}}</td>
+<td><span class="{{v.stCls}}"><span class="dot"></span>{{v.stLbl}}</span></td>
+<td><div class="row-actions">
+<sc-if value="{{v.canUse}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost btn-sm" aria-label="{{v.lUse}}" onClick="{{v.use}}">Mark as used</button></sc-if>
+<sc-if value="{{v.isUsed}}" hint-placeholder-val="{{ false }}"><span class="t-small t-muted" style="padding: 0 14px">Used on {{v.usedLbl}}</span></sc-if>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{v.lDel}}" onClick="{{v.del}}">Delete</button>
+</div></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13M12 8c-1.5-3-5-3.5-5-1s3 1 5 1c2 0 5 1.5 5-1s-3.5-2-5 1"></path></svg></span><h2 class="t-h3">No gift vouchers yet</h2><p class="t-muted">When a client buys a voucher, create it here: pick the treatment and the code is generated for you.</p><div class="first-acts"><button type="button" class="btn btn-primary" onClick="{{openNew}}">Create the first voucher</button></div></div></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><p class="empty">No vouchers found.</p></sc-if>
+</div>
+
+<ul class="mcards">
+<sc-for list="{{rows}}" as="v" hint-placeholder-count="4">
+<li class="mcard">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span class="code">{{v.code}}</span><span class="{{v.stCls}}"><span class="dot"></span>{{v.stLbl}}</span></div>
+<p class="pprice">{{v.valueLbl}}</p>
+<p class="t-small" style="color: #4F4446">For <b style="font-weight: 600">{{v.to}}</b> · from {{v.from}}<br>Expiry: {{v.expLbl}}</p>
+<div class="acts">
+<sc-if value="{{v.canUse}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary btn-sm" aria-label="{{v.lUse}}" onClick="{{v.use}}">Mark as used</button></sc-if>
+<sc-if value="{{v.isUsed}}" hint-placeholder-val="{{ false }}"><span class="t-small t-muted" style="display: flex; align-items: center; min-height: 44px">Used on {{v.usedLbl}}</span></sc-if>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{v.lDel}}" onClick="{{v.del}}">Delete</button>
+</div>
+</li>
+</sc-for>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><li class="mcard"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13M12 8c-1.5-3-5-3.5-5-1s3 1 5 1c2 0 5 1.5 5-1s-3.5-2-5 1"></path></svg></span><h2 class="t-h3">No gift vouchers yet</h2><p class="t-muted">When a client buys a voucher, create it here: pick the treatment and the code is generated for you.</p><div class="first-acts"><button type="button" class="btn btn-primary" onClick="{{openNew}}">Create the first voucher</button></div></div></li></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><li class="mcard t-muted">No vouchers found.</li></sc-if>
+</ul>
+</main>
+
+<sc-if value="{{mNew}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="vn-t" onSubmit="{{save}}" novalidate>
+<div class="modal-hd"><h2 id="vn-t" class="t-h3">New gift voucher</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="field"><label for="vn-svc">Treatment</label>
+<dc-import name="Select" uid="vn-svc" label="Treatment" placeholder="Choose a treatment" options="{{svcOpts}}" value="{{f.svc}}" invalid="{{f.errSvc}}" on-change="{{f.setSvc}}" hint-size="100%,52px"></dc-import>
+<sc-if value="{{f.errSvc}}" hint-placeholder-val="{{ false }}"><span class="err">Choose the treatment</span></sc-if></div>
+<sc-if value="{{f.hasPrice}}" hint-placeholder-val="{{ false }}"><p class="t-small" style="color: #4F4446">Voucher value: <b style="font-weight: 600">€ {{f.price}}</b> (treatment price)</p></sc-if>
+<div class="row2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)">
+<div class="field"><label for="vn-from">Bought by</label><input id="vn-from" class="input" type="text" placeholder="First and last name" value="{{f.from}}" onInput="{{f.setFrom}}"></div>
+<div class="field"><label for="vn-to">For</label><input id="vn-to" class="{{f.toCls}}" type="text" placeholder="Name of the recipient" value="{{f.to}}" onInput="{{f.setTo}}">
+<sc-if value="{{f.errTo}}" hint-placeholder-val="{{ false }}"><span class="err">Write who the voucher is for</span></sc-if></div>
+</div>
+<div class="field" style="max-width: 280px"><label for="vn-exp">Expiry</label>
+<dc-import name="Select" uid="vn-exp" label="Expiry" options="{{expOpts}}" value="{{f.exp}}" on-change="{{f.setExp}}" hint-size="100%,52px"></dc-import>
+</div>
+<div class="dur-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M3 12h18M12 8v13"></path></svg>Code generated automatically: <span class="code">{{f.code}}</span></div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{save}}" class="btn btn-primary">Create voucher</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mDel}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="vd-t" aria-describedby="vd-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="vd-t" class="t-h3" style="padding-top: 10px">Delete voucher {{t.code}}?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="vd-d" style="color: #4F4446">The code will no longer be valid. Only do this if the voucher was created by mistake.</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmDel}}">Delete voucher</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toastOn}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status" aria-live="polite">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+<span class="tmsg">{{toastMsg}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-sm" onClick="{{undo}}">Undo</button></sc-if>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"modal":{"editor":"enum","options":["none","new"],"default":"none"},"$preview":{"width":1440,"height":1100}}'>
+const TODAY = 3; // giovedì 12 novembre 2026
+const MESI3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dOf = (off) => new Date(2026, 10, 9 + off);
+const offOf = (y, m, d) => Math.round((Date.UTC(y, m, d) - Date.UTC(2026, 10, 9)) / 864e5);
+const dLbl = (off) => { const d = dOf(off); return d.getDate() + ' ' + MESI3[d.getMonth()] + ' ' + d.getFullYear(); };
+const SVCS0 = [
+  { name: 'Deep cleansing facial', dur: 60, price: 60 }, { name: 'Anti-ageing facial', dur: 50, price: 75 }, { name: 'Skin consultation', dur: 30, price: 20 },
+  { name: 'Relaxing massage', dur: 60, price: 55 }, { name: 'Lymphatic drainage', dur: 60, price: 60 }, { name: 'Body treatment', dur: 90, price: 80 },
+  { name: 'Body scrub', dur: 45, price: 40 }
+];
+const VOUCHERS0 = [
+  { id: 'v1', code: 'GB-4821', svc: 'Anti-ageing facial', amount: 75, from: 'Anna Galli', to: 'Sara Bassi', created: offOf(2026, 9, 2), expires: offOf(2027, 3, 2), used: null },
+  { id: 'v2', code: 'GB-6142', svc: 'Deep cleansing facial', amount: 60, from: 'Paola Riccio', to: 'Tea Ferrante', created: offOf(2026, 10, 10), expires: offOf(2027, 4, 10), used: null },
+  { id: 'v3', code: 'GB-3307', svc: 'Relaxing massage', amount: 55, from: 'Marta Rossetti', to: 'Silvia Moro', created: offOf(2026, 8, 15), expires: offOf(2027, 2, 15), used: offOf(2026, 9, 20) },
+  { id: 'v4', code: 'GB-5590', svc: 'Body scrub', amount: 40, from: 'Vera Longhi', to: 'Lia Bruni', created: offOf(2026, 7, 10), expires: offOf(2026, 10, 10), used: null },
+  { id: 'v5', code: 'GB-7215', svc: 'Body treatment', amount: 80, from: 'Rosa Bassani', to: 'Gaia Orsi', created: offOf(2026, 9, 28), expires: null, used: null },
+  { id: 'v6', code: 'GB-2954', svc: 'Lymphatic drainage', amount: 60, from: 'Clara Doni', to: 'Nora Ghidi', created: offOf(2026, 5, 1), expires: offOf(2026, 11, 1), used: null }
+];
+const EXP = [['3', '3 months'], ['6', '6 months'], ['12', '12 months'], ['0', 'No expiry']];
+const newCode = () => 'GB-' + String(1000 + Math.floor(Math.random() * 9000));
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient', 'products', 'vouchers'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  toast(msg, undo) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({ toast: { msg, undo: undo || null } });
+    this._t = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  blank() { return { svc: '', from: '', to: '', exp: '12', code: newCode(), err: {} }; }
+  curForm() { return this.state.form || (this._f0 || (this._f0 = this.blank())); }
+  setF(p) { this.setState({ form: { ...this.curForm(), ...p } }); }
+  renderVals() {
+    const vouchers = this.state.vouchers ?? VOUCHERS0;
+    const svcs = this.state.svcs ?? SVCS0;
+    const modal = this.state.modal ?? (this.props.modal || 'none');
+    const filter = this.state.filter || 'tutti';
+    const q = (this.state.q || '').trim().toLowerCase();
+    const status = (v) => (v.used !== null && v.used !== undefined ? 'usato' : (v.expires !== null && v.expires !== undefined && v.expires < TODAY ? 'scaduto' : 'valido'));
+    const val = (v) => (v.svc || 'Treatment') + ' · € ' + String(v.amount || 0).replace('.', ',');
+    const all = vouchers.map((v) => ({ ...v, st: status(v) }));
+    const shown = all
+      .filter((v) => filter === 'tutti' || v.st === filter.slice(0, -1) + 'o')
+      .filter((v) => !q || v.code.toLowerCase().includes(q) || v.to.toLowerCase().includes(q) || v.from.toLowerCase().includes(q))
+      .sort((a, b) => b.created - a.created);
+    const t = vouchers.find((v) => v.id === this.state.target) || { code: '' };
+    const close = () => this.setState({ modal: 'none', form: null });
+    const fm = this.curForm();
+    const e = fm.err || {};
+    const tt = this.state.toast || null;
+    const active = all.filter((v) => v.st === 'valido');
+    return {
+      nActive: active.length,
+      activeValue: active.reduce((s, v) => s + (v.amount || 0), 0),
+      nUsed: all.filter((v) => v.st === 'usato').length,
+      nExpired: all.filter((v) => v.st === 'scaduto').length,
+      q: this.state.q || '',
+      setQ: (ev) => this.setState({ q: ev.target.value }),
+      filters: [['tutti', 'All'], ['validi', 'Valid'], ['usati', 'Used'], ['scaduti', 'Expired']].map(([k, l]) => ({ label: l, pressed: filter === k ? 'true' : 'false', pick: () => this.setState({ filter: k }) })),
+      rows: shown.map((v) => ({
+        ...v,
+        valueLbl: val(v),
+        createdLbl: dLbl(v.created),
+        expLbl: v.expires === null || v.expires === undefined ? 'None' : dLbl(v.expires),
+        stLbl: v.st === 'valido' ? 'Valid' : (v.st === 'usato' ? 'Used' : 'Expired'),
+        stCls: 'tag ' + (v.st === 'valido' ? 'tag-ok' : (v.st === 'usato' ? 'tag-neutral' : 'tag-danger')),
+        canUse: v.st === 'valido',
+        isUsed: v.st === 'usato',
+        usedLbl: v.used !== null && v.used !== undefined ? dLbl(v.used) + (v.usedFor ? ' · ' + v.usedFor : '') : '',
+        lUse: 'Mark as used: voucher ' + v.code,
+        lDel: 'Delete voucher ' + v.code,
+        use: () => {
+          this.setState({ vouchers: vouchers.map((x) => (x.id === v.id ? { ...x, used: TODAY } : x)) });
+          this.toast('Voucher ' + v.code + ' marked as used', vouchers);
+        },
+        del: () => this.setState({ modal: 'delete', target: v.id })
+      })),
+      isEmpty: shown.length === 0,
+      none: vouchers.length === 0, isEmptySearch: shown.length === 0 && vouchers.length > 0,
+      t,
+      mNew: modal === 'new',
+      mDel: modal === 'delete',
+      close,
+      onKey: (ev) => { if (ev.key === 'Escape') close(); },
+      openNew: () => { this._f0 = null; this.setState({ modal: 'new', form: this.blank() }); },
+      svcOpts: svcs.map((s) => ({ v: s.name, l: s.name + ' · € ' + s.price })),
+      expOpts: EXP.map(([v, l]) => ({ v, l })),
+      f: {
+        ...fm,
+        hasPrice: !!svcs.find((x) => x.name === fm.svc),
+        price: (svcs.find((x) => x.name === fm.svc) || { price: '' }).price,
+        setSvc: (ev) => this.setF({ svc: ev.target.value }),
+        setFrom: (ev) => this.setF({ from: ev.target.value }),
+        setTo: (ev) => this.setF({ to: ev.target.value }),
+        setExp: (ev) => this.setF({ exp: ev.target.value }),
+        errSvc: !!e.svc, errTo: !!e.to,
+        toCls: 'input' + (e.to ? ' is-error' : '')
+      },
+      save: (ev) => {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        const cur = this.curForm();
+        const err = {};
+        if (!cur.svc) err.svc = 1;
+        if (!cur.to.trim()) err.to = 1;
+        if (Object.keys(err).length) { this.setF({ err }); return; }
+        const months = Number(cur.exp);
+        const td = dOf(TODAY);
+        const expires = months ? offOf(td.getFullYear(), td.getMonth() + months, td.getDate()) : null;
+        const item = { id: 'v' + Date.now(), code: cur.code, svc: cur.svc, amount: (svcs.find((x) => x.name === cur.svc) || { price: 0 }).price, from: cur.from.trim() || '—', to: cur.to.trim(), created: TODAY, expires, used: null };
+        this.setState({ vouchers: [item, ...vouchers], modal: 'none', form: null, filter: 'tutti' });
+        this.toast('Voucher ' + item.code + ' created');
+      },
+      confirmDel: () => { this.setState({ vouchers: vouchers.filter((v) => v.id !== t.id), modal: 'none' }); this.toast('Voucher ' + t.code + ' deleted', vouchers); },
+      toastOn: !!tt, toastMsg: tt ? tt.msg : '', toastUndo: !!(tt && tt.undo),
+      undo: () => { if (tt && tt.undo) this.setState({ vouchers: tt.undo, toast: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

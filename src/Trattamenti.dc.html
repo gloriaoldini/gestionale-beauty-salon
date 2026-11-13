@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Treatments</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./gb.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<dc-import name="Header" active="trattamenti" hint-size="100%,72px"></dc-import>
+
+<main class="page">
+<div class="page-hd">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="serif t-h1">Treatments</h1>
+<p class="t-muted" style="max-width: 640px">Length and price of every treatment. When you choose it in the Calendar, the appointment length is set automatically.</p>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap">
+<button type="button" class="btn btn-secondary btn-lg" onClick="{{openCat}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M12 10v6M9 13h6"></path></svg>New category</button>
+<button type="button" class="btn btn-primary btn-lg" onClick="{{openNew}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New treatment</button>
+</div>
+</div>
+
+<div class="toolbar">
+<div class="search">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<label for="svc-q" class="sr">Search treatment</label>
+<input id="svc-q" class="input" type="search" placeholder="Search treatment" value="{{q}}" onInput="{{setQ}}">
+</div>
+<div class="pills" role="group" aria-label="Filter by category">
+<sc-for list="{{catPills}}" as="p" hint-placeholder-count="5"><button type="button" class="pill" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+</div>
+
+<p class="t-label t-muted" style="margin-bottom: 12px" aria-live="polite">{{countLbl}}</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+<thead><tr><th scope="col">Treatment</th><th scope="col" class="num">Length</th><th scope="col" class="num">Price</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+<tbody>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<tr class="grp"><th scope="colgroup" colspan="4" style="text-align: left; background: #FBF5F3; padding: 12px 20px; font-size: 15px; color: #2A2325">{{g.cat}}<span class="cnt">{{g.cnt}}</span></th></tr>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<tr class="svc">
+<td><span class="svc-name">{{r.name}}</span></td>
+<td class="num"><span class="dur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{r.durLbl}}</span></td>
+<td class="num">{{r.priceLbl}}</td>
+<td><div class="row-actions">
+<button type="button" class="btn btn-ghost btn-sm" aria-label="{{r.lEdit}}" onClick="{{r.edit}}">Edit</button>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{r.lDel}}" onClick="{{r.del}}">Delete</button>
+</div></td>
+</tr>
+</sc-for>
+<sc-if value="{{g.empty}}" hint-placeholder-val="{{ false }}">
+<tr><td colspan="4"><span class="t-muted">No treatments in this category yet.</span> <button type="button" class="btn btn-ghost btn-sm" onClick="{{g.add}}">Add treatment</button></td></tr>
+</sc-if>
+</sc-for>
+</tbody>
+</table>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg></span><h2 class="t-h3">No treatments yet</h2><p class="t-muted">Create a category (for example Face or Body), then add the treatments with length and price.</p><div class="first-acts"><button type="button" class="btn btn-secondary" onClick="{{openCat}}">New category</button><button type="button" class="btn btn-primary" onClick="{{openNew}}">New treatment</button></div></div></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><p class="empty">No treatments found. Try a different search or category.</p></sc-if>
+</div>
+
+<div class="mcards" style="flex-direction: column; gap: 12px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<h2 class="mc-grp">{{g.cat}}<span class="cnt">{{g.cnt}}</span></h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<li class="mcard">
+<span class="svc-name" style="font-size: 17px">{{r.name}}</span>
+<div class="mc-meta"><span class="dur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{r.durLbl}}</span><span>{{r.priceLbl}}</span></div>
+<div class="acts">
+<button type="button" class="btn btn-secondary btn-sm" aria-label="{{r.lEdit}}" onClick="{{r.edit}}">Edit</button>
+<button type="button" class="btn btn-danger-ghost btn-sm" aria-label="{{r.lDel}}" onClick="{{r.del}}">Delete</button>
+</div>
+</li>
+</sc-for>
+</ul>
+<sc-if value="{{g.empty}}" hint-placeholder-val="{{ false }}">
+<div class="mcard"><span class="t-muted">No treatments in this category yet.</span><button type="button" class="btn btn-secondary btn-sm" style="align-self: flex-start" onClick="{{g.add}}">Add treatment</button></div>
+</sc-if>
+</sc-for>
+<sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="card"><div class="first"><span class="first-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg></span><h2 class="t-h3">No treatments yet</h2><p class="t-muted">Create a category (for example Face or Body), then add the treatments with length and price.</p><div class="first-acts"><button type="button" class="btn btn-secondary" onClick="{{openCat}}">New category</button><button type="button" class="btn btn-primary" onClick="{{openNew}}">New treatment</button></div></div></div></sc-if>
+<sc-if value="{{isEmptySearch}}" hint-placeholder-val="{{ false }}"><p class="empty card">No treatments found.</p></sc-if>
+</div>
+
+</main>
+
+<sc-if value="{{mEdit}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="te-t" onSubmit="{{save}}" novalidate>
+<div class="modal-hd"><h2 id="te-t" class="t-h3">{{f.title}}</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="field"><label for="te-name">Treatment name</label><input id="te-name" class="{{f.nameCls}}" type="text" placeholder="E.g. Deep cleansing facial" value="{{f.name}}" onInput="{{f.setName}}" aria-invalid="{{f.errNameS}}">
+<sc-if value="{{f.errName}}" hint-placeholder-val="{{ false }}"><span class="err">Write the treatment name</span></sc-if></div>
+<div class="field">
+<sc-if value="{{f.pickCat}}" hint-placeholder-val="{{ true }}">
+<label for="te-cat">Category</label>
+<dc-import name="Select" uid="te-cat" label="Category" options="{{cats}}" value="{{f.cat}}" on-change="{{f.setCat}}" hint-size="100%,52px"></dc-import>
+<button type="button" class="btn btn-ghost btn-sm" style="align-self: flex-start; padding-left: 4px" onClick="{{f.toNewCat}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New category</button>
+</sc-if>
+<sc-if value="{{f.newCatMode}}" hint-placeholder-val="{{ false }}">
+<label for="te-newcat">New category</label>
+<input id="te-newcat" class="{{f.newCatCls}}" type="text" placeholder="E.g. Lashes and brows" value="{{f.newCat}}" onInput="{{f.setNewCat}}">
+<sc-if value="{{f.errCat}}" hint-placeholder-val="{{ false }}"><span class="err">{{f.errCatMsg}}</span></sc-if>
+<button type="button" class="btn btn-ghost btn-sm" style="align-self: flex-start; padding-left: 4px" onClick="{{f.toPickCat}}">Choose an existing category</button>
+</sc-if>
+</div>
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend class="lbl" style="margin-bottom: 6px">Length</legend>
+<div class="row2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)">
+<div class="field"><label for="te-h" class="sr">Hours</label><dc-import name="Select" uid="te-h" label="Length, hours" options="{{hoursOpts}}" value="{{f.h}}" invalid="{{f.errDur}}" on-change="{{f.setH}}" hint-size="100%,52px"></dc-import></div>
+<div class="field"><label for="te-m" class="sr">Minutes</label><dc-import name="Select" uid="te-m" label="Length, minutes" options="{{minOpts}}" value="{{f.m}}" invalid="{{f.errDur}}" on-change="{{f.setM}}" hint-size="100%,52px"></dc-import></div>
+</div>
+<sc-if value="{{f.errDur}}" hint-placeholder-val="{{ false }}"><span class="err" style="margin-top: 6px">Choose a length</span></sc-if>
+</fieldset>
+<div class="field"><label for="te-price">Price</label><div class="price-in"><span aria-hidden="true">€</span><input id="te-price" class="{{f.priceCls}}" type="text" inputmode="decimal" placeholder="0" value="{{f.price}}" onInput="{{f.setPrice}}" aria-invalid="{{f.errPriceS}}"></div>
+<sc-if value="{{f.errPrice}}" hint-placeholder-val="{{ false }}"><span class="err">Enter a valid price</span></sc-if></div>
+<div class="dur-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>In the Calendar the appointment will last {{f.durLbl}}.</div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{save}}" class="btn btn-primary">{{f.saveLbl}}</button></div>
+</form>
+</div>
+</sc-if>
+
+<sc-if value="{{mDel}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="td-t" aria-describedby="td-d">
+<div class="modal-hd">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<span class="modal-ic" style="background: #FDECEA; color: #B42318" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></span>
+<h2 id="td-t" class="t-h3" style="padding-top: 10px">Delete “{{t.name}}”?</h2>
+</div>
+<button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div class="modal-bd"><p id="td-d" style="color: #4F4446">It will no longer be selectable when you add an appointment.</p></div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" class="btn btn-danger" onClick="{{confirmDel}}">Delete</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{mCat}}" hint-placeholder-val="{{ false }}">
+<div class="overlay">
+<form class="modal" role="dialog" aria-modal="true" aria-labelledby="tc-t" onSubmit="{{saveCat}}" novalidate>
+<div class="modal-hd"><h2 id="tc-t" class="t-h3">New category</h2><button type="button" class="icon-btn" aria-label="Close" onClick="{{close}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="modal-bd">
+<div class="field"><label for="tc-name">Category name</label><input id="tc-name" class="{{catCls}}" type="text" placeholder="E.g. Lashes and brows" value="{{catDraft}}" onInput="{{setCatDraft}}" aria-describedby="tc-h">
+<sc-if value="{{catErr}}" hint-placeholder-val="{{ false }}"><span class="err">{{catErrMsg}}</span></sc-if>
+<span id="tc-h" class="hint">It will show as a group in the list and as a filter at the top.</span></div>
+</div>
+<div class="modal-ft"><button type="button" class="btn btn-secondary" onClick="{{close}}">Cancel</button><button type="button" onClick="{{saveCat}}" class="btn btn-primary">Create category</button></div>
+</form>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"empty":{"editor":"boolean","default":false},"modal":{"editor":"enum","options":["none","edit","delete","cat"],"default":"none"},"target":{"editor":"enum","options":["","s1","s2","s3","s4","s5","s6","s7"],"default":""},"$preview":{"width":1440,"height":1200}}'>
+const CATS = ['Face', 'Body'];
+const SVCS0 = [
+  { id: 's1', cat: 'Face', name: 'Deep cleansing facial', dur: 60, price: 60 },
+  { id: 's2', cat: 'Face', name: 'Anti-ageing facial', dur: 50, price: 75 },
+  { id: 's3', cat: 'Face', name: 'Skin consultation', dur: 30, price: 20 },
+  { id: 's4', cat: 'Body', name: 'Relaxing massage', dur: 60, price: 55 },
+  { id: 's5', cat: 'Body', name: 'Lymphatic drainage', dur: 60, price: 60 },
+  { id: 's6', cat: 'Body', name: 'Body treatment', dur: 90, price: 80 },
+  { id: 's7', cat: 'Body', name: 'Body scrub', dur: 45, price: 40 }
+];
+const fmtDur = (d) => { const h = Math.floor(d / 60), m = d % 60; return h ? h + ' h' + (m ? ' ' + m + ' min' : '') : m + ' min'; };
+const fmtPrice = (p) => '€ ' + String(p).replace('.', ',');
+const HOURS = [0, 1, 2, 3].map((v) => ({ v: String(v), l: v + ' h' }));
+const MINS = []; for (let m = 0; m < 60; m += 5) MINS.push({ v: String(m), l: m + ' min' });
+// Dati condivisi tra le pagine del prototipo (solo nel browser di chi lo prova)
+const SHARED_KEY = 'gb-demo-v4';
+const SHARED = ['items', 'clients', 'svcs', 'cats', 'members', 'selClient'];
+const MEM = {};
+function loadShared() { let s = {}; try { s = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; } catch (e) { s = {}; } return { ...MEM, ...s }; }
+function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.parse(window.localStorage.getItem(SHARED_KEY) || '{}') || {}; window.localStorage.setItem(SHARED_KEY, JSON.stringify({ ...cur, ...patch })); } catch (e) {} }
+class Component extends DCLogic {
+  componentDidMount() {
+    // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
+    if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
+    const orig = this.setState.bind(this);
+    this.setState = (obj, cb) => {
+      if (obj && typeof obj === 'object') { const p = {}; SHARED.forEach((k) => { if (k in obj && obj[k] !== undefined) p[k] = obj[k]; }); if (Object.keys(p).length) saveShared(p); }
+      return orig(obj, cb);
+    };
+    this._pull = () => { const s = loadShared(); const p = {}; SHARED.forEach((k) => { if (s[k] !== undefined) p[k] = s[k]; }); if (Object.keys(p).length) orig(p); };
+    this._pull();
+    try { window.addEventListener('storage', this._pull); } catch (e) {}
+  }
+  componentWillUnmount() { try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  formFrom(s) {
+    return s
+      ? { id: s.id, name: s.name, cat: s.cat, h: String(Math.floor(s.dur / 60)), m: String(s.dur % 60), price: String(s.price).replace('.', ','), err: {} }
+      : { id: null, name: '', cat: (this.state.cats ?? CATS)[0] || '', h: '1', m: '0', price: '', newCatMode: !(this.state.cats ?? CATS).length, newCat: '', err: {} };
+  }
+  setF(p) { this.setState({ form: { ...this.curForm(), ...p } }); }
+  curForm() {
+    if (this.state.form) return this.state.form;
+    const svcs = this.state.svcs ?? SVCS0;
+    return this.formFrom(svcs.find((s) => s.id === this.props.target));
+  }
+  renderVals() {
+    const svcs = this.state.svcs ?? SVCS0;
+    const cats = this.state.cats ?? CATS;
+    const cat = this.state.cat ?? 'All';
+    const q = this.state.q ?? '';
+    const modal = this.state.modal ?? (this.props.modal || 'none');
+    const tid = this.state.target ?? (this.props.target || 's7');
+    const t = svcs.find((s) => s.id === tid) || svcs[0] || { name: '' };
+    const ql = q.trim().toLowerCase();
+    const shown = svcs.filter((s) => (cat === 'All' || s.cat === cat) && (!ql || s.name.toLowerCase().includes(ql)));
+    const groups = cats.map((c) => {
+      const rows = shown.filter((s) => s.cat === c).map((s) => ({
+        ...s,
+        durLbl: fmtDur(s.dur),
+        priceLbl: fmtPrice(s.price),
+        lEdit: 'Edit ' + s.name,
+        lDel: 'Delete ' + s.name,
+        edit: () => this.setState({ modal: 'edit', form: this.formFrom(s) }),
+        del: () => this.setState({ modal: 'delete', target: s.id })
+      }));
+      return {
+        cat: c, rows, empty: rows.length === 0,
+        cnt: rows.length === 1 ? '1 treatment' : rows.length + ' treatments',
+        add: () => this.setState({ modal: 'edit', form: { ...this.formFrom(null), cat: c } })
+      };
+    }).filter((g) => g.rows.length || (!ql && (cat === 'All' || cat === g.cat)));
+
+    const fm = this.curForm();
+    const dur = Number(fm.h) * 60 + Number(fm.m);
+    const f = {
+      ...fm,
+      title: fm.id ? 'Edit treatment' : 'New treatment',
+      saveLbl: fm.id ? 'Save changes' : 'Add treatment',
+      durLbl: dur ? fmtDur(dur) : '—',
+      setName: (e) => this.setF({ name: e.target.value }),
+      setCat: (e) => this.setF({ cat: e.target.value }),
+      setH: (e) => this.setF({ h: e.target.value }),
+      setM: (e) => this.setF({ m: e.target.value }),
+      setPrice: (e) => this.setF({ price: e.target.value }),
+      errName: !!fm.err.name, errDur: !!fm.err.dur, errPrice: !!fm.err.price,
+      errNameS: fm.err.name ? 'true' : 'false', errPriceS: fm.err.price ? 'true' : 'false',
+      nameCls: 'input' + (fm.err.name ? ' is-error' : ''),
+      durCls: 'input' + (fm.err.dur ? ' is-error' : ''),
+      priceCls: 'input' + (fm.err.price ? ' is-error' : ''),
+      pickCat: !fm.newCatMode,
+      newCatMode: !!fm.newCatMode,
+      newCat: fm.newCat || '',
+      toNewCat: () => this.setF({ newCatMode: true }),
+      toPickCat: () => this.setF({ newCatMode: false, err: { ...fm.err, cat: 0 } }),
+      setNewCat: (e) => this.setF({ newCat: e.target.value }),
+      errCat: !!fm.err.cat,
+      errCatMsg: fm.err.cat === 2 ? 'This category already exists' : 'Write the category name',
+      newCatCls: 'input' + (fm.err.cat ? ' is-error' : '')
+    };
+    const catDraft = this.state.catDraft || '';
+    const catErr = this.state.catErr || 0;
+    const close = () => this.setState({ modal: 'none', form: null });
+    return {
+      q,
+      setQ: (e) => this.setState({ q: e.target.value }),
+      catPills: ['All'].concat(cats).map((c) => ({ label: c, pressed: c === cat ? 'true' : 'false', pick: () => this.setState({ cat: c }) })),
+      countLbl: shown.length === 1 ? '1 treatment' : shown.length + ' treatments',
+      groups,
+      isEmpty: shown.length === 0,
+      none: svcs.length === 0, isEmptySearch: shown.length === 0 && svcs.length > 0,
+      cats,
+      mCat: modal === 'cat',
+      openCat: () => this.setState({ modal: 'cat', catDraft: '', catErr: 0 }),
+      catDraft,
+      setCatDraft: (e) => this.setState({ catDraft: e.target.value }),
+      catErr: !!catErr,
+      catErrMsg: catErr === 2 ? 'This category already exists' : 'Write the category name',
+      catCls: 'input' + (catErr ? ' is-error' : ''),
+      saveCat: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const n = catDraft.trim();
+        if (!n) { this.setState({ catErr: 1 }); return; }
+        if (cats.some((c) => c.toLowerCase() === n.toLowerCase())) { this.setState({ catErr: 2 }); return; }
+        this.setState({ cats: [...cats, n], modal: 'none', catDraft: '', catErr: 0, cat: 'All', q: '' });
+      },
+      hoursOpts: HOURS,
+      minOpts: MINS,
+      mEdit: modal === 'edit',
+      mDel: modal === 'delete',
+      t,
+      f,
+      close,
+      onKey: (e) => { if (e.key === 'Escape') close(); },
+      openNew: () => this.setState({ modal: 'edit', form: this.formFrom(null) }),
+      save: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const cur = this.curForm();
+        const d = Number(cur.h) * 60 + Number(cur.m);
+        const p = Number(String(cur.price).replace(',', '.'));
+        const err = {};
+        if (!cur.name.trim()) err.name = 1;
+        if (!d) err.dur = 1;
+        if (cur.price === '' || isNaN(p) || p < 0) err.price = 1;
+        let catName = cur.cat;
+        if (cur.newCatMode) {
+          catName = (cur.newCat || '').trim();
+          if (!catName) err.cat = 1;
+          else if (cats.some((c) => c.toLowerCase() === catName.toLowerCase())) err.cat = 2;
+        }
+        if (Object.keys(err).length) { this.setF({ err }); return; }
+        const item = { id: cur.id || ('s' + Date.now()), cat: catName, name: cur.name.trim(), dur: d, price: p };
+        const next = cur.id ? svcs.map((s) => (s.id === cur.id ? item : s)) : [...svcs, item];
+        this.setState({ svcs: next, cats: cur.newCatMode ? [...cats, catName] : cats, modal: 'none', form: null });
+      },
+      confirmDel: () => this.setState({ svcs: svcs.filter((s) => s.id !== t.id), modal: 'none' })
+    };
+  }
+}
+</script>
+</body>
+</html>
