@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beauty salon manager · prototype (concept)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css">
+<style>
+body{margin:0}
+.intro{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;background:var(--pink-50)}
+.intro-box{max-width:640px;width:100%;background:#fff;border:1px solid var(--line);border-radius:24px;padding:40px;display:flex;flex-direction:column;gap:20px}
+.intro-acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.intro-acts a{display:flex;flex-direction:column;gap:4px;align-items:flex-start;height:auto;padding:16px 18px;text-align:left;white-space:normal}
+.intro-acts small{font-weight:400;font-size:14px;opacity:.9}
+@media (max-width:560px){.intro-box{padding:24px}.intro-acts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="gb">
+<main class="intro">
+<div class="intro-box">
+<p class="t-over">Concept · UX/UI case study</p>
+<h1 class="serif t-h1">A management tool for a beauty salon</h1>
+<p class="t-muted">Calendar, clients, treatments, products and gift vouchers in one place. Names, prices and data are fictional.</p>
+<div class="intro-acts">
+<a class="btn btn-primary btn-lg" href="Login.html">Try the demo<small>The salon in use, with sample data</small></a>
+<a class="btn btn-secondary btn-lg" href="Signup.html">Try the first sign-in<small>Create the account and take the tour</small></a>
+</div>
+</div>
+</main>
+</div>
+</body>
+</html>
