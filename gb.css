@@ -204,10 +204,10 @@
 .dh .dd{font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1}
 .dh.is-today{background:var(--pink-50)}
 .dh.is-today .dd{color:var(--rose-700)}
-.times{position:relative;height:792px}
+.times{position:relative;height:calc(var(--pph,72px) * 11)}
 .times span{position:absolute;right:10px;font-size:12px;font-weight:500;color:var(--muted)}
-.col{position:relative;height:792px;border-left:1px solid var(--line);
-  background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 72px),repeating-linear-gradient(to bottom,transparent 0 36px,#F6F1EF 36px 37px,transparent 37px 72px)}
+.col{position:relative;height:calc(var(--pph,72px) * 11);border-left:1px solid var(--line);
+  background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px var(--pph,72px)),repeating-linear-gradient(to bottom,transparent 0 calc(var(--pph,72px) / 2),#F6F1EF calc(var(--pph,72px) / 2) calc(var(--pph,72px) / 2 + 1px),transparent calc(var(--pph,72px) / 2 + 1px) var(--pph,72px))}
 .col.is-today{background-color:#FFFAFB}
 .now{position:absolute;left:0;right:0;height:2px;background:var(--rose);z-index:3;pointer-events:none}
 .now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--rose)}
@@ -772,3 +772,28 @@
 .tour-bd{padding:18px 28px 6px;display:flex;flex-direction:column;gap:8px}
 .tour-ft{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 @container (max-width:560px){.tour-top{padding:20px 20px 0}.tour-vis{margin:14px 20px 0;padding:16px}.tour-bd{padding:14px 20px 4px}.tv-cal{grid-template-columns:1fr}}
+
+/* Desktop: calendar fits the screen, no page scroll */
+@media (min-width:901px){
+  .gb.cal-fit{height:100vh;min-height:0 !important;display:flex;flex-direction:column;overflow:hidden}
+  .gb.cal-fit>.page{flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;padding-top:20px;padding-bottom:20px}
+  .gb.cal-fit .cal-bar{margin-bottom:12px}
+  .gb.cal-fit .month-row{margin:0 0 10px}
+  .gb.cal-fit .week,.gb.cal-fit .month{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+  .gb.cal-fit .week-hd{flex:none}
+  .gb.cal-fit .dh{min-height:56px;padding-top:8px;padding-bottom:8px}
+  .gb.cal-fit .week-bd{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden}
+  .gb.cal-fit .m-hd{flex:none}
+  .gb.cal-fit .m-grid{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);overflow:hidden}
+  .gb.cal-fit .m-cell{min-height:0;overflow:hidden;padding:4px 6px}
+  .gb.cal-fit .m-day{height:28px;min-width:28px;font-size:14px;padding:0 8px}
+  .gb.cal-fit .m-it,.gb.cal-fit .m-more{min-height:22px;padding:2px 6px}
+}
+/* Short appointments: show only what fits */
+.appt.is-short{padding:3px 8px}
+.appt.is-short .tr{display:none}
+.appt.is-tiny{flex-direction:row;align-items:center;gap:6px;padding:0 6px}
+.appt.is-tiny .tr{display:none}
+.appt.is-tiny .ah{font-size:11px;flex:none}
+.appt.is-tiny .ini{width:16px;height:16px;font-size:10px}
+.appt.is-tiny .nm{font-size:12px;min-width:0}

@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>body{margin:0}</style>
 </helmet>
-<div class="gb" style="min-height: 100vh" onKeyDown="{{onKey}}">
+<div class="gb cal-fit" style="min-height: 100vh" onKeyDown="{{onKey}}">
 <dc-import name="Header" active="calendario" hint-size="100%,72px"></dc-import>
 
 <main class="page">
@@ -54,7 +54,7 @@
 </div>
 </sc-for>
 </div>
-<div class="week-bd">
+<div class="week-bd" style="--pph: {{pph}}px">
 <div class="times" aria-hidden="true">
 <sc-for list="{{hours}}" as="h" hint-placeholder-count="11">
 <span style="top: {{h.top}}px">{{h.label}}</span>
@@ -62,7 +62,7 @@
 </div>
 <sc-for list="{{cols}}" as="d" hint-placeholder-count="6">
 <div class="{{d.colCls}}" role="group" aria-label="{{d.full}}" onClick="{{d.click}}" onMouseMove="{{d.move}}" onMouseLeave="{{d.leave}}" onDragOver="{{d.dragOver}}" onDrop="{{d.drop}}" onDragLeave="{{d.leave}}">
-<sc-if value="{{d.isToday}}" hint-placeholder-val="{{ false }}"><div class="now" style="top: 84px" aria-hidden="true"></div></sc-if>
+<sc-if value="{{d.isToday}}" hint-placeholder-val="{{ false }}"><div class="now" style="top: {{d.nowTop}}px" aria-hidden="true"></div></sc-if>
 <sc-if value="{{d.ghost.show}}" hint-placeholder-val="{{ false }}">
 <div class="{{d.ghost.cls}}" style="top: {{d.ghost.top}}px; height: {{d.ghost.h}}px" aria-hidden="true">{{d.ghost.label}}</div>
 </sc-if>
@@ -483,7 +483,8 @@ const STAFF0 = [
 // Giorno 0 = lunedì 9 novembre 2026. Oggi = giovedì 12 novembre, ore 10:10.
 const TODAY = 3;
 const NOW = 10 * 60 + 10;
-const PPH = 72;
+let PPH = 72;
+let MAXI = 3;
 const START = 9 * 60;
 const WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const WDS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -604,6 +605,21 @@ function saveShared(patch) { Object.assign(MEM, patch); try { const cur = JSON.p
 function applyC6() { try { const s = JSON.parse(window.localStorage.getItem('gb-demo-v4') || '{}') || {}; const r = document.documentElement.style; if (s.c6hex) { r.setProperty('--c6x', s.c6hex); r.setProperty('--c6x-50', s.c6hex + '24'); } else { r.removeProperty('--c6x'); r.removeProperty('--c6x-50'); } } catch (e) {} }
 class Component extends DCLogic {
   componentDidMount() {
+    // Desktop: il calendario riempie lo schermo senza scroll della pagina
+    this._fit = () => {
+      let p = PPH, mi = MAXI;
+      try {
+        const wide = window.innerWidth > 900;
+        const bd = document.querySelector('.cal-fit .week-bd');
+        if (bd) p = wide ? Math.max(40, Math.min(72, Math.floor((bd.clientHeight - 2) / 11))) : 72;
+        const mg = document.querySelector('.cal-fit .m-grid');
+        if (mg) { const rows = Math.max(1, Math.round(mg.children.length / 6)); mi = wide ? Math.max(1, Math.min(3, Math.floor((mg.clientHeight / rows - 34) / 22))) : 3; }
+      } catch (e) { return; }
+      if (p !== PPH || mi !== MAXI) { PPH = p; MAXI = mi; this.setState({ pph: p, maxi: mi }); }
+    };
+    this._onResize = () => { clearTimeout(this._ft); this._ft = setTimeout(this._fit, 60); };
+    try { window.addEventListener('resize', this._onResize); } catch (e) {}
+    setTimeout(this._fit, 0);
     applyC6(); try { window.addEventListener('storage', applyC6); } catch (e) {}
     // Tavola "primo accesso": centro vuoto, senza toccare i dati salvati
     if (this.props.empty === true || this.props.empty === 'true') { this.setState({ items: [], clients: [], svcs: [], cats: [], products: [], vouchers: [], sales: [] }); return; }
@@ -616,7 +632,7 @@ class Component extends DCLogic {
     this._pull();
     try { window.addEventListener('storage', this._pull); } catch (e) {}
   }
-  componentWillUnmount() { if (this._t) clearTimeout(this._t); try { window.removeEventListener('storage', this._pull); } catch (e) {} }
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); try { window.removeEventListener('resize', this._onResize); } catch (e) {} try { window.removeEventListener('storage', this._pull); } catch (e) {} }
   // Tour di benvenuto: solo da guardare, si può saltare
   tourVals(items) {
     const T = this.state.tour || {};
@@ -771,6 +787,7 @@ class Component extends DCLogic {
     this.toast(d.editId ? 'Changes saved · ' + when : (it.kind === 'block' ? 'Time blocked · ' + when : 'Appointment saved · ' + when), d.editId ? null : null);
   }
   renderVals() {
+    if (this._onResize) this._onResize();
     const items = this.items();
     const ALLSTAFF = this.state.members
       ? this.state.members.map((m) => ({ id: m.id, name: (m.nome + ' ' + (m.cognome || '')).trim(), short: m.nome, ini: (m.nome || '?').charAt(0).toUpperCase(), c: m.c, active: m.active !== false }))
@@ -800,7 +817,7 @@ class Component extends DCLogic {
         iniCls: 'ini bg-' + st.c,
         agCls: 'ag-item ' + (blk ? '' : st.c),
         dotCls: 'm-dot ' + (blk ? 'blk' : 'bg-' + st.c),
-        cls: 'appt ' + (blk ? 'blk' : st.c) + (open === it.id ? ' is-open' : '') + (dragId === it.id ? ' is-dragging' : ''),
+        cls: 'appt ' + (blk ? 'blk' : st.c) + ((it.e - it.s) / 60 * PPH - 3 < 36 ? ' is-tiny' : (it.e - it.s) / 60 * PPH - 3 < 60 ? ' is-short' : '') + (open === it.id ? ' is-open' : '') + (dragId === it.id ? ' is-dragging' : ''),
         expanded: open === it.id ? 'true' : 'false',
         label: shortLbl(it.day) + ', ' + fmt(it.s) + '–' + fmt(it.e) + ', ' + it.client + ', ' + it.tr + ', ' + st.name + (cn ? ', client note: ' + cn : '') + (it.note ? ', with appointment note' : '') + '. Open details',
         click: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ open: it.id, noteDraft: '', hover: null }); },
@@ -834,6 +851,7 @@ class Component extends DCLogic {
         isLast: ci === n - 1,
         cur: off === TODAY ? 'date' : undefined,
         colCls: 'col' + (off === TODAY ? ' is-today' : ''),
+        nowTop: Math.round(84 / 72 * PPH),
         ghost,
         click: (e) => {
           if (e.target !== e.currentTarget) return;
@@ -899,8 +917,8 @@ class Component extends DCLogic {
           n: dt.getDate(),
           cls: 'm-cell' + (dt.getMonth() !== mm ? ' out' : '') + (off === TODAY ? ' is-today' : ''),
           aria: 'Open ' + longLbl(off) + ', ' + its.length + ' appointments',
-          items: its.slice(0, 3),
-          more: its.length > 3, moreN: its.length - 3,
+          items: its.slice(0, its.length > MAXI ? Math.max(0, MAXI - 1) : its.length),
+          more: its.length > MAXI, moreN: its.length - Math.max(0, MAXI - 1),
           open: () => this.setState({ view: 'giorno', cur: off, pday: off }),
           out: dt.getMonth() !== mm,
           pmCls: 'pm-cell' + (dt.getMonth() !== mm ? ' out' : '') + (off === TODAY ? ' is-today' : ''),
@@ -972,7 +990,7 @@ class Component extends DCLogic {
         notePh: blk ? 'Add a note…' : 'Add a note for this appointment…',
         delLbl: blk ? 'Delete block' : 'Delete appointment',
         del: () => this.askDelete(oi.id),
-        top: this.state.vFor === oi.id ? 0 : Math.max(0, Math.min(((oi.s - START) / 60) * PPH, 792 - 480)),
+        top: this.state.vFor === oi.id ? 0 : Math.max(0, Math.min(((oi.s - START) / 60) * PPH, Math.max(0, 11 * PPH - 480))),
         left,
         dup: () => this.openFrom(oi, 'dup'),
         edit: () => this.openFrom(oi, 'edit')
@@ -1086,6 +1104,7 @@ class Component extends DCLogic {
         label: l, pressed: view === k ? 'true' : 'false',
         pick: () => this.setState({ view: k, open: null, cur: k === 'giorno' && wdOf(cur) === 6 ? cur - 1 : cur })
       })),
+      pph: PPH,
       isGrid: view !== 'mese',
       isMonth: view === 'mese',
       weekCls: 'week' + (view === 'giorno' ? ' is-day' : ''),
